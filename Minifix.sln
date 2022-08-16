@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32516.85
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Charon - Minifix - Blue Collar", "Charon - Minifix - Blue Collar\Charon - Minifix - Blue Collar.csproj", "{49C363C9-3C71-4E90-A07D-E31E863067B4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Charon - Minifix - Blue Collar", "Charon - Minifix - Blue Collar\Charon - Minifix - Blue Collar.csproj", "{49C363C9-3C71-4E90-A07D-E31E863067B4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Charon - Minifix - Miner Gunners", "Charon - Minifix - Miner Gunners\Charon - Minifix - Miner Gunners.csproj", "{DDFE6E0F-DE0A-415E-83B2-90FD713D68D4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{49C363C9-3C71-4E90-A07D-E31E863067B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{49C363C9-3C71-4E90-A07D-E31E863067B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{49C363C9-3C71-4E90-A07D-E31E863067B4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DDFE6E0F-DE0A-415E-83B2-90FD713D68D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DDFE6E0F-DE0A-415E-83B2-90FD713D68D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DDFE6E0F-DE0A-415E-83B2-90FD713D68D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DDFE6E0F-DE0A-415E-83B2-90FD713D68D4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
