@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System;
-using static UnityEngine.GraphicsBuffer;
 
 namespace Charon_SV_Minifix.MinerGunners {
     public enum ControlMode : int {
