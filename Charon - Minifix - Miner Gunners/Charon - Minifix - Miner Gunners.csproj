@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <RootNamespace>Charon___Minifix___Miner_Gunners</RootNamespace>
+    <RootNamespace>Charon_SV_Minifix.MinerGunners</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -23,6 +23,9 @@
     </Reference>
     <Reference Include="UnityEngine.PhysicsModule">
       <HintPath>D:\Games\SteamLibrary\steamapps\common\Star Valor\Star Valor_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>D:\Games\SteamLibrary\steamapps\common\Star Valor\Star Valor_Data\Managed\UnityEngine.UI.dll</HintPath>
     </Reference>
   </ItemGroup>
 
