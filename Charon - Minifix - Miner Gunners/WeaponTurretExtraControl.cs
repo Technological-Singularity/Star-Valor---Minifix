@@ -167,7 +167,8 @@ namespace Charon_SV_Minifix.MinerGunners {
         public void Pretext_Save() {
             foreach (var kvp in turretControlMap) {
                 var gunner = ss.crew.GetGunner(kvp.Key);
-                gunner.control = kvp.Value == 0 ? -1 : 0; //prefix, set to -1 or 0 to redirect to appropriate place for text lookup
+                if (gunner != null)
+                    gunner.control = kvp.Value == 0 ? -1 : 0; //prefix, set to -1 or 0 to redirect to appropriate place for text lookup
             }
         }
         public void Postload_Restore() {
