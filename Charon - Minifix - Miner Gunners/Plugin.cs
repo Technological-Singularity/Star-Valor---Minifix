@@ -15,12 +15,8 @@ namespace Charon_SV_Minifix.MinerGunners {
         public const string pluginVersion = "0.0.0.1";
 
         public static BepInEx.Logging.ManualLogSource Log;
-        static MethodInfo weapon_turret_CanFireAgainst;
+        static MethodInfo weapon_turret_CanFireAgainst = typeof(WeaponTurret).GetMethod("CanFireAgainst", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
         static float CanFireAgainst(WeaponTurret instance, Transform targetTrans) => (float)weapon_turret_CanFireAgainst.Invoke(instance, new object[] { targetTrans });
-
-        static Plugin() {
-            weapon_turret_CanFireAgainst = typeof(WeaponTurret).GetMethod("CanFireAgainst", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-        }
 
         public void Awake() {
             Log = Logger;
