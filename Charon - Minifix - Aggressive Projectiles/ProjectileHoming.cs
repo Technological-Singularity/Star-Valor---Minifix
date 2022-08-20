@@ -81,7 +81,7 @@ namespace Charon_SV_Minifix.AggressiveProjectiles {
                 transform.position = new Vector3(transform.position.x, 0, transform.position.z);
 
             this.maxSpeed = speed;
-            this.maxAccel = 4 * speed;
+            this.maxAccel = 5 * speed;
             this.maxTurnRate = turnRate;
 
             ProjectileDecayer.AddDecayer(owner.gameObject);
@@ -114,11 +114,11 @@ namespace Charon_SV_Minifix.AggressiveProjectiles {
             return (mag * Mathf.Cos(angle), mag * Mathf.Sin(angle));
         }
         Vector3 CalculateAimError() {
-            if (crewId < 0 || rb == null || targetRB == null)
+            if (crewId < 0 || rb == null || Target == null)
                 return Vector3.zero;
 
-            var sideways = targetRB.velocity - rb.velocity;
-            var toward = (targetRB.position - rb.position).normalized;
+            var sideways = State.vel - rb.velocity;
+            var toward = (State.pos - rb.position).normalized;
             sideways -= Vector3.Dot(sideways, toward) * toward;
             var gunnerLevelEffective = Mathf.Max(0, gunnerLevel - Mathf.Max(0, gunnerControlTracker.Value - 0.5f));
             float deviation = sideways.magnitude / (70 + gunnerLevelEffective * 5) * 20f + 3f - gunnerLevelEffective;
@@ -149,7 +149,7 @@ namespace Charon_SV_Minifix.AggressiveProjectiles {
                 return;
             }
 
-            var wantFacing = targetRB == null ? rb.transform.forward : Predict_SelfPropelled(rb.position, rb.velocity, maxAccel);
+            var wantFacing = Target == null ? rb.transform.forward : Predict_SelfPropelled(rb.position, rb.velocity, maxAccel);
             var error = CalculateAimError();
             var facing = Quaternion.LookRotation(wantFacing + error);
             var maxTurn = maxTurnRate * Time.deltaTime;

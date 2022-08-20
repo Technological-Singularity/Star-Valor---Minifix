@@ -1,62 +1,39 @@
 ﻿using UnityEngine;
+using System;
+using System.Collections.Generic;
 
 namespace Charon_SV_Minifix.AggressiveProjectiles {
     public class TargetPredictor : MonoBehaviour {
         public Transform Target { get; private set; } = null;
-        protected Rigidbody targetRB;
         (Vector3 pos, Vector3 vel, Vector3 accel) targetState;
         (Vector3 pos, Vector3 vel, Vector3 accel) targetStateRaw;
+        protected const int iir_factor = 5;
+        const float missile_time_estimate = 2f;
+
+        public (Vector3 pos, Vector3 vel, Vector3 accel) State => targetState;
 
         public void Initialize(Transform target) {
             if (target == null) {
                 Target = null;
-                targetRB = null;
                 targetState = (Vector3.zero, Vector3.zero, Vector3.zero);
                 return;
             }
             var rb = target.GetComponent<Rigidbody>();
             this.Target = target;
-            this.targetRB = rb;
             if (rb == null)
-                targetState = (Vector3.zero, Vector3.zero, Vector3.zero);
+                targetState = (Target.position, Vector3.zero, Vector3.zero);
             else
                 targetState = (rb.position, rb.velocity, Vector3.zero);
             targetStateRaw = targetState;
         }
 
-        static float rms(Vector3 values) {
-            var inner = 0f;
-            inner += values.x * values.x;
-            inner += values.y * values.y;
-            inner += values.z * values.z;
-            return Mathf.Sqrt(inner / 3);
-        }
-
-        (float lower, float higher) quadratic(float a, float b, float c) {
-            var interior = b * b - 4 * a * c;
-            if (interior < 0)
-                return (float.NaN, float.NaN);
-
-            interior = Mathf.Sqrt(interior);
-            var negative = (-b - interior) / (2 * a);
-            var positive = (-b + interior) / (2 * a);
-            return negative < positive ? (negative, positive) : (positive, negative);
-        }
-        float quadraticLowestPositive(float a, float b, float c) {
-            var (lower, higher) = quadratic(a, b, c);
-            if (float.IsNaN(higher) || higher < 0)
-                return float.NaN;
-            return lower < 0 ? higher : lower;
-        }
         protected virtual void FixedUpdate() {
             UpdateTargetData();
         }
-        const int iir_factor = 5;
-        const float missile_time_estimate = 4f;
         private void UpdateTargetData() {
-            if (targetRB == null)
+            if (Target == null)
                 return;
-            var newPos = targetRB.position;
+            var newPos = Target.position;
             var newVel = (newPos - targetStateRaw.pos) / Time.deltaTime;
             var newAccel = (newVel - targetStateRaw.vel) / Time.deltaTime;
 
@@ -135,11 +112,14 @@ namespace Charon_SV_Minifix.AggressiveProjectiles {
             //return targetPosition + relVelocity * expectedTime + relAcceleration / 2 * expectedTime * expectedTime;
         }
         public Vector3 Predict_SelfPropelled(Vector3 sourcePosition, Vector3 sourceVelocity, float sourceAccel) {
-            var relSpeed = sourceAccel * missile_time_estimate; //this is wrong, but assume updates will catch errors
-            var (intersect, intercept) = Predict_OneShot(sourcePosition, sourceVelocity, sourceAccel * missile_time_estimate);
+            //var relSpeed = sourceAccel * missile_time_estimate; //this is wrong, but assume updates will catch errors
+            var (_, intercept) = Predict_OneShot(sourcePosition, sourceVelocity, sourceAccel * missile_time_estimate);
             if (intercept == Vector3.zero) {
                 intercept = (targetState.pos - sourcePosition) + (targetState.vel - sourceVelocity) * missile_time_estimate;
                 intercept.Normalize();
+            }
+            if (intercept == Vector3.zero) {
+                intercept = (targetState.pos - sourcePosition).normalized;
             }
             return intercept;
 

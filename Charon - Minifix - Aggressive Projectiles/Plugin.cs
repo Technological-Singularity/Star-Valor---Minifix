@@ -3,6 +3,7 @@ using HarmonyLib;
 using System.Reflection;
 using UnityEngine;
 using System.Linq;
+using System.ComponentModel;
 
 namespace Charon_SV_Minifix.AggressiveProjectiles {
 
@@ -41,9 +42,6 @@ namespace Charon_SV_Minifix.AggressiveProjectiles {
             var weapon = ss.weapons.Where(o => o != null && (ProjectileControl)weaponProjControl.GetValue(o) == __instance).FirstOrDefault();
 
             control.Initialize(___owner, ___rb, ss, weapon, __instance.target, ___speed, ___turnSpeed * 15); //15 is from original code
-
-
-
             control.enabled = true;
         }
 
@@ -56,7 +54,7 @@ namespace Charon_SV_Minifix.AggressiveProjectiles {
                     control = __instance.gameObject.AddComponent<AimObjectControl>();
                 if (!control.enabled || ___ss != control.SpaceShip || control.Target != __instance.target) {
                     if (___ss != control.SpaceShip)
-                        control.ClearStates();
+                        control.Clear();
                     control.Initialize(__instance, ___ss, __instance.target);
                     control.enabled = true;
                 }
@@ -75,9 +73,11 @@ namespace Charon_SV_Minifix.AggressiveProjectiles {
             return true;
         }
 
+        //static System.Collections.Generic.Dictionary<AIControl, GameObject> reticles = new System.Collections.Generic.Dictionary<AIControl, GameObject>();
+
         [HarmonyPatch(typeof(AIControl), "AimAtTarget")]
         [HarmonyPrefix]
-        public static bool AIControl_AimAtTarget(ref bool __result, AIControl __instance, GameObject ___aimTarget, float ___aimErrorX, float ___aimErrorZ, bool ___firingBeamWeapon, Transform ___tf, Rigidbody ___rb, SpaceShip ___ss, Quaternion ___targetRotation) {
+        public static bool AIControl_AimAtTarget(ref bool __result, AIControl __instance, GameObject ___aimTarget, float ___aimErrorX, float ___aimErrorZ, bool ___firingBeamWeapon, Transform ___tf, Rigidbody ___rb, SpaceShip ___ss, ref Quaternion ___targetRotation) {
             if (__instance.target == null) {
                 __result = false;
                 var component = __instance.transform.GetComponent<TargetPredictor>();
@@ -92,31 +92,48 @@ namespace Charon_SV_Minifix.AggressiveProjectiles {
                 return false;
             }
 
+            //var player = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerControl>();
+            //if (!reticles.TryGetValue(__instance, out var reticle)) {
+            //    reticle = Instantiate(player.AimObj, ___aimTarget.transform);
+            //    reticles[__instance] = reticle;
+            //    reticle.SetActive(true);
+            //}
+
             Vector3 prediction;
             var error = new Vector3(___aimErrorX, 0, ___aimErrorZ);
 
             if (___firingBeamWeapon) {
-                prediction = __instance.target.position - ___tf.position + error;
+                prediction = __instance.target.position + error;
             }
             else {
-                var component = __instance.transform.GetComponent<TargetPredictor>();
-                if (component == null)
-                    component = __instance.gameObject.AddComponent<TargetPredictor>();
-                if (!component.enabled)
-                    component.enabled = true;
-                if (component.Target != __instance.target)
-                    component.Initialize(__instance.target);
+                var components = __instance.transform.GetComponents<TargetPredictor>();
+                if (components == null || components.Length == 0) {
+                    components = new TargetPredictor[] { null, null };
+                    components[0] = __instance.gameObject.AddComponent<TargetPredictor>();
+                    components[0].Initialize(__instance.transform);
+                    components[0].enabled = true;
+                    components[1] = __instance.gameObject.AddComponent<TargetPredictor>();
+                }
+                if (!components[1].enabled)
+                    components[1].enabled = true;
+                if (components[1].Target != __instance.target)
+                    components[1].Initialize(__instance.target);
 
-                (_, prediction) = component.Predict_OneShot(___tf.position + error, ___rb.velocity, __instance.currWeaponSpeed);
-                if (prediction == Vector3.zero)
-                    prediction = (__instance.target.position - ___tf.position);
+                var (pos, vel, _) = components[0].State;
+                (_, prediction) = components[1].Predict_OneShot(pos/* + error*/, vel, __instance.currWeaponSpeed);
+                if (prediction == Vector3.zero) {
+                    var d = (__instance.target.position - pos).magnitude / __instance.currWeaponSpeed;
+                    prediction = __instance.target.position + d * (__instance.target.GetComponent<Rigidbody>().velocity - vel);
+                }
+                else {
+                    prediction = pos + Vector3.Dot(components[1].State.pos - pos, prediction) * prediction;
+                }
             }
             ___aimTarget.transform.position = prediction;
-            var newRotationTarget = Quaternion.LookRotation(prediction);
-            ___targetRotation = newRotationTarget;            
-            ___ss.Turn(newRotationTarget);
+            ___targetRotation = Quaternion.LookRotation(prediction - __instance.transform.position);
+            ___ss.Turn(___targetRotation);
 
-            var angleDeltaActual = Quaternion.Angle(__instance.transform.rotation, newRotationTarget);
+            var angleDeltaActual = Quaternion.Angle(__instance.transform.rotation, ___targetRotation);
             __result = angleDeltaActual <= 20f && AIControl_ClearLOF(__instance, angleDeltaActual > 10f);
 
             return false;
@@ -180,7 +197,7 @@ namespace Charon_SV_Minifix.AggressiveProjectiles {
 
         [HarmonyPatch(typeof(WeaponTurret), "AimAtTarget")]
         [HarmonyPrefix]
-        public static bool WeaponTurret_AimAtTarget(ref bool __result, WeaponTurret __instance, GameObject ___aimTarget, float ___aimErrorX, float ___aimErrorZ, bool ___firingBeamWeapon, Transform ___tf, Rigidbody ___rb, SpaceShip ___ss) {
+        public static bool WeaponTurret_AimAtTarget(ref bool __result, WeaponTurret __instance, GameObject ___aimTarget, float ___aimErrorX, float ___aimErrorZ, bool ___firingBeamWeapon, Rigidbody ___rb, SpaceShip ___ss) {
             if (__instance.target == null) {
                 __result = false;
                 var component = __instance.transform.GetComponent<TargetPredictor>();
@@ -199,7 +216,7 @@ namespace Charon_SV_Minifix.AggressiveProjectiles {
             var error = new Vector3(___aimErrorX, 0, ___aimErrorZ);
 
             if (___firingBeamWeapon) {
-                prediction = __instance.target.position - ___tf.position + error;
+                prediction = __instance.target.position - __instance.transform.position + error;
             }
             else {
                 var component = __instance.transform.GetComponent<TargetPredictor>();
@@ -222,10 +239,11 @@ namespace Charon_SV_Minifix.AggressiveProjectiles {
                 //else {
                 //avgSpeed /= count;
 
-                (_, prediction) = component.Predict_OneShot(___tf.position + error, ___rb.velocity, __instance.currWeaponSpeed);
-                if (prediction == Vector3.zero)
-                    prediction = (__instance.target.position - ___tf.position);
-                
+                (_, prediction) = component.Predict_OneShot(__instance.transform.position/* + error*/, ___rb.velocity, __instance.currWeaponSpeed);
+                if (prediction == Vector3.zero) {
+                    var d = (__instance.target.position - __instance.transform.position).magnitude / __instance.currWeaponSpeed;
+                    prediction = __instance.target.position + d * (__instance.target.GetComponent<Rigidbody>().velocity - ___rb.velocity);
+                }
                 //}
             }
             ___aimTarget.transform.position = prediction;
