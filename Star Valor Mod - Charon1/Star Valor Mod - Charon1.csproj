@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <RootNamespace>Charon.StarValor</RootNamespace>
+    <RootNamespace>Star_Valor_Mod___Charon1</RootNamespace>
   </PropertyGroup>
 	
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
