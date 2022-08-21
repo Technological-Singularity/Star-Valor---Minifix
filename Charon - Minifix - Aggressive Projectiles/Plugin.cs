@@ -3,7 +3,7 @@ using HarmonyLib;
 using System.Reflection;
 using UnityEngine;
 using System.Linq;
-using System.ComponentModel;
+using System.Collections.Generic;
 
 namespace Charon_SV_Minifix.AggressiveProjectiles {
 
@@ -120,7 +120,7 @@ namespace Charon_SV_Minifix.AggressiveProjectiles {
                     components[1].Initialize(__instance.target);
 
                 var (pos, vel, _) = components[0].State;
-                (_, prediction) = components[1].Predict_OneShot(pos/* + error*/, vel, __instance.currWeaponSpeed);
+                (_, prediction) = components[1].Predict_OneShot(pos + error, vel, __instance.currWeaponSpeed);
                 if (prediction == Vector3.zero) {
                     var d = (__instance.target.position - pos).magnitude / __instance.currWeaponSpeed;
                     prediction = __instance.target.position + d * (__instance.target.GetComponent<Rigidbody>().velocity - vel);
@@ -216,7 +216,7 @@ namespace Charon_SV_Minifix.AggressiveProjectiles {
             var error = new Vector3(___aimErrorX, 0, ___aimErrorZ);
 
             if (___firingBeamWeapon) {
-                prediction = __instance.target.position - __instance.transform.position + error;
+                prediction = __instance.target.position + error;
             }
             else {
                 var component = __instance.transform.GetComponent<TargetPredictor>();
@@ -239,15 +239,19 @@ namespace Charon_SV_Minifix.AggressiveProjectiles {
                 //else {
                 //avgSpeed /= count;
 
-                (_, prediction) = component.Predict_OneShot(__instance.transform.position/* + error*/, ___rb.velocity, __instance.currWeaponSpeed);
+                var (pos, vel) = (__instance.transform.position, ___rb.velocity);
+                (_, prediction) = component.Predict_OneShot(pos + error, vel, __instance.currWeaponSpeed);
                 if (prediction == Vector3.zero) {
-                    var d = (__instance.target.position - __instance.transform.position).magnitude / __instance.currWeaponSpeed;
-                    prediction = __instance.target.position + d * (__instance.target.GetComponent<Rigidbody>().velocity - ___rb.velocity);
+                    var d = (__instance.target.position - pos).magnitude / __instance.currWeaponSpeed;
+                    prediction = __instance.target.position + d * (__instance.target.GetComponent<Rigidbody>().velocity - vel) + error;
+                }
+                else {
+                    prediction = pos + Vector3.Dot(component.State.pos - pos, prediction) * prediction;
                 }
                 //}
             }
             ___aimTarget.transform.position = prediction;
-            var newRotationTarget = Quaternion.LookRotation(prediction);
+            var newRotationTarget = Quaternion.LookRotation(prediction - __instance.transform.position);
             var maxDegreesDelta = Time.deltaTime * 10f * __instance.turnSpeed;
 
             __instance.transform.rotation = Quaternion.RotateTowards(__instance.transform.rotation, newRotationTarget, maxDegreesDelta);
@@ -256,5 +260,121 @@ namespace Charon_SV_Minifix.AggressiveProjectiles {
 
             return false;
         }
+
+        class WeaponSlotExtraData : MonoBehaviour {
+            public enum WeaponStatType : int {
+                Normal = 0,
+                PD = 1,
+                Repair = 2,
+                Beam = 3,
+            }
+            public class WeaponStat {
+                public WeaponStatType Type { get; }
+                public float Range { get; private set; }
+                public float Speed { get; private set; }
+                public WeaponStat(WeaponStatType type) {
+                    Type = type;
+                    Clear();
+                }
+                public void Update(Weapon weapon) {
+                    if ((weapon.range > Range || float.IsNaN(Range))) {
+                        Range = weapon.range;
+                        Speed = weapon.wRef.compType == WeaponCompType.BeamWeaponObject ? float.PositiveInfinity : weapon.wRef.speed;
+                    }
+                }
+                public bool IsValid => !float.IsNaN(Range);
+                public void Clear() {
+                    Range = float.NaN;
+                    Speed = float.NaN;
+                }
+                public float GetEffectiveRange(Vector3 relativePosition, Vector3 relativeVelocity) {
+                    if (!IsValid)
+                        return -1f;
+                    
+                    if (float.IsInfinity(Speed))
+                        return Range;
+
+                    var speed = Mathf.Max(0, Speed - Vector3.Dot(relativePosition.normalized, relativeVelocity));
+                    return speed * Range / Speed;
+                }
+            }
+
+            SpaceShip ss;
+            List<List<WeaponStat>> weaponStats = new List<List<WeaponStat>>();
+            public WeaponStat this[int slotId, WeaponStatType type] => weaponStats[slotId][(int)type];            
+
+            public void Initialize(SpaceShip ss) {
+                weaponStats.Clear();
+                this.ss = ss;
+                for (int i = 0; i < ss.weaponSlots.childCount; ++i) {
+                    var stats = new List<WeaponStat>();
+                    foreach (WeaponStatType type in System.Enum.GetValues(typeof(WeaponStatType)))
+                        stats.Add(new WeaponStat(type));
+                    weaponStats.Add(stats);
+                }
+            }
+            public void Refresh() {
+                for(int slotIndex = 0; slotIndex < weaponStats.Count; ++slotIndex) {
+                    var weapons = ss.weapons.Where(o => o.weaponSlotIndex == slotIndex);
+                    foreach (var w in weapons) {
+                        if (w.wRef.canHitProjectiles)
+                            this[slotIndex, WeaponStatType.PD].Update(w);
+                        if (w.wRef.compType == WeaponCompType.BeamWeaponObject && w.wRef.damageType != DamageType.Repair)
+                            this[slotIndex, WeaponStatType.Beam].Update(w);
+                        else if (w.wRef.damageType == DamageType.Repair)
+                            this[slotIndex, WeaponStatType.Repair].Update(w);
+                        else
+                            this[slotIndex, WeaponStatType.Normal].Update(w);
+                    }
+                }
+            }
+
+        }
+
+        [HarmonyPatch(typeof(SpaceShip), nameof(SpaceShip.UpdateWeaponTurretStats))]
+        [HarmonyPrefix]
+        public static void SpaceShip_UpdateWeaponTurretStats_AppendModule(SpaceShip __instance) {
+            var component = __instance.GetComponent<WeaponSlotExtraData>();
+            if (component == null) {
+                component = __instance.gameObject.AddComponent<WeaponSlotExtraData>();
+                component.Initialize(__instance);
+            }
+            component.Refresh();
+        }
+
+        [HarmonyPatch(typeof(WeaponTurret), "CanFireAgainst")]
+        [HarmonyPrefix]
+        public static void WeaponTurret_CanFireAgainst_FixRange(WeaponTurret __instance, Transform targetTrans, ref float ___desiredDistance, ref float __state, SpaceShip ___ss) {
+            __state = ___desiredDistance;
+            if (targetTrans.tag == "Projectile") {
+                var component = __instance.GetComponent<WeaponSlotExtraData>();
+                if (component == null) {
+                    component = __instance.gameObject.AddComponent<WeaponSlotExtraData>();
+                    component.Initialize(___ss);
+                    component.Refresh();
+                }
+
+                var targetRB = targetTrans.GetComponent<Rigidbody>();
+                if (targetRB == null)
+                    targetRB = ___ss.rb;
+                var relPosition = targetTrans.position - __instance.transform.position;
+                var relVelocity = targetRB.velocity - ___ss.rb.velocity;
+                var newDistance = component[__instance.turretIndex, WeaponSlotExtraData.WeaponStatType.PD].GetEffectiveRange(relPosition, relVelocity);
+
+                ___desiredDistance = newDistance;
+            }
+            //add more later if appropriate
+        }
+
+        [HarmonyPatch(typeof(WeaponTurret), "CanFireAgainst")]
+        [HarmonyPostfix]
+        public static void WeaponTurret_CanFireAgainst_FixRangeCleanup(Transform targetTrans, ref float ___desiredDistance, ref float __state) {
+            ___desiredDistance = __state;
+        }
     }
 }
+
+//The following functions should be updated to have altered range based on the velocity of the target:
+//WeaponTurret.CanFireAt
+//AIControl.FireAllWeapons
+

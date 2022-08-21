@@ -92,8 +92,8 @@ namespace Charon_SV_Minifix.AggressiveProjectiles {
                 }           
 
                 float degreeLimit;
-                bool enabled = true;
-                if (w.turretMounted >= 0) {
+                bool enabled = !w.manned;
+                if (enabled && w.turretMounted >= 0) {
                     var turret = turrets[w.turretMounted];
                     if (turret.type == WeaponTurretType.limitedArch)
                         degreeLimit = Mathf.Max(15, turret.degreesLimit / 2);
@@ -106,6 +106,8 @@ namespace Charon_SV_Minifix.AggressiveProjectiles {
                 }
                 container.Enabled = enabled;
             }
+            foreach (var kvp in updateValues.Where(o => o.Value.Weapon.manned))
+                kvp.Value.Enabled = false;
             foreach (var kvp in updateValues.Where(o => o.Value.Weapon == null || o.Value.Reticle == null || o.Value.Target != o.Value.Weapon.weaponSlot))
                 toRemove.Add(kvp);
 
@@ -126,10 +128,8 @@ namespace Charon_SV_Minifix.AggressiveProjectiles {
                 var (pos, vel, _) = container.Predictor.State;
                 var (_, prediction) = predictor.Predict_OneShot(pos, vel, speed);
 
-                if (prediction != Vector3.zero) {
+                if (prediction != Vector3.zero && container.Enabled)
                     container.Reticle.transform.position = pos + Vector3.Dot(predictor.State.pos - pos, prediction) * prediction; //predictor.FindClosestPoint(pos, prediction);//weapon.range * prediction + transform.position;
-                    container.Enabled = true;
-                }
             }
         }
         void OnDisable() {
