@@ -7,7 +7,7 @@ These mods require the BepInEx mod framework.
 Install the latest 5.x (x86) release, see here for instructions:
 > [BepinEx link](https://docs.bepinex.dev/articles/user_guide/installation/index.html)
 
-> **Important**: Star Valor is a 32-bit application. Make sure you choose the 32-bit version of BepinEx.
+**Important**: Star Valor is a 32-bit application. Make sure you choose the 32-bit version of BepinEx.
 
 After installing BepInEx, download the latest release of the plugin (the .dll file) from the link below and put it in the BepInEx/plugins folder inside of your Star Valor game directory:
 > [Dropbox link](https://www.dropbox.com/sh/bn4kfjyousemti0/AAAQMEH73Icp3-Yvi-WtwREZa?dl=0)
