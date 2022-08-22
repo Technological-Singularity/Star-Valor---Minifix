@@ -13,7 +13,6 @@ After installing BepInEx, download the latest release of the plugin (the .dll fi
 * As with all mods, make sure to **back up your save game** before trying a new mod.
 * Only download mods from reliable sources: as with everything on the internet, be careful.
 
-
 Downloads
 ---
 Plugin links: [All plugins](https://www.dropbox.com/sh/bn4kfjyousemti0/AAAQMEH73Icp3-Yvi-WtwREZa?dl=0)
