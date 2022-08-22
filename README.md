@@ -3,7 +3,6 @@ Star Valor Plugins
 
 Installing Plugins
 ---
----
 These mods require the BepInEx mod framework.
 Install the latest 5.x (x86) release, see here for instructions: [BepinEx](https://docs.bepinex.dev/articles/user_guide/installation/index.html)
 
@@ -24,6 +23,8 @@ Downloads
 Plugin links: [All plugins](https://www.dropbox.com/sh/bn4kfjyousemti0/AAAQMEH73Icp3-Yvi-WtwREZa?dl=0)
 
 Source links: [Minifix](https://github.com/Technological-Singularity/Star-Valor---Minifix)
+
+---
 
 Plugin Descriptions
 ===
