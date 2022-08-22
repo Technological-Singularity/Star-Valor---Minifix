@@ -16,11 +16,9 @@ After installing BepInEx, download the latest release of the plugin (the .dll fi
 
 Downloads
 ---
-**'Latest'**: Most recently compiled versions
-
-**'Stable'**: Versions known to be stable
-
 Plugin links: [All plugins](https://www.dropbox.com/sh/bn4kfjyousemti0/AAAQMEH73Icp3-Yvi-WtwREZa?dl=0)
+* **'Latest'**: Most recently compiled versions; 
+* **'Stable'**: Versions known to be stable
 
 Source links: [Minifix](https://github.com/Technological-Singularity/Star-Valor---Minifix)
 
