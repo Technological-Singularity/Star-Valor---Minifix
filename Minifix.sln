@@ -11,7 +11,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Charon - Minifix - Aggressi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Charon - Minifix - Wider Targeting", "Charon - Minifix - Wider Targeting\Charon - Minifix - Wider Targeting.csproj", "{1A534923-E358-4B25-925D-38651EB140B5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Charon - TEMPLATE", "Charon - Minifix - Wider Targeting - Copy\Charon - TEMPLATE.csproj", "{8FDF2952-20C1-47E9-8E6C-2EAB9E219CCA}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D0BDC1F4-89D8-453E-A6D5-1CCE79765366}"
+	ProjectSection(SolutionItems) = preProject
+		..\README.txt = ..\README.txt
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,10 +38,6 @@ Global
 		{1A534923-E358-4B25-925D-38651EB140B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1A534923-E358-4B25-925D-38651EB140B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1A534923-E358-4B25-925D-38651EB140B5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8FDF2952-20C1-47E9-8E6C-2EAB9E219CCA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8FDF2952-20C1-47E9-8E6C-2EAB9E219CCA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8FDF2952-20C1-47E9-8E6C-2EAB9E219CCA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8FDF2952-20C1-47E9-8E6C-2EAB9E219CCA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
