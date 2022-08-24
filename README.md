@@ -15,6 +15,7 @@ After installing BepInEx, download the latest release of the plugin (the .dll fi
 
 After installing, if your mods don't work, try the following:
 > Navigate to the where you installed BepinEx, and open doorstop_config.ini with a text editor
+
 > Change "ignoreDisableSwitch=false" to "ignoreDisableSwitch=true"
 
 Downloads
