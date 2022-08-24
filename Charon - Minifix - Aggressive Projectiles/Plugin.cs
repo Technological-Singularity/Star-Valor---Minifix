@@ -30,15 +30,17 @@ namespace Charon_SV_Minifix.AggressiveProjectiles {
         }
 
         static FieldInfo weaponProjControl = typeof(Weapon).GetField("projControl", BindingFlags.NonPublic | BindingFlags.Instance);
-
         [HarmonyPatch(typeof(ProjectileControl), "Start")]
         [HarmonyPostfix]
         public static void Projectile_Start(ProjectileControl __instance, Transform ___owner, Rigidbody ___rb, float ___speed, float ___turnSpeed) {
             if (!__instance.homing)
-                return;           
+                return;
 
             var control = __instance.transform.gameObject.AddComponent<ProjectileHoming>();
             var ss = ___owner.GetComponent<SpaceShip>();
+
+            //this only works because the Start() method is called before the instantiation of the next projectile starts (for multi-barrel weapons)
+            //this is not a very good way to solve this, but without Transpiler it would be difficult to pass the __instance to the ProjectileHoming object
             var weapon = ss.weapons.Where(o => o != null && (ProjectileControl)weaponProjControl.GetValue(o) == __instance).FirstOrDefault();
 
             control.Initialize(___owner, ___rb, ss, weapon, __instance.target, ___speed, ___turnSpeed * 15); //15 is from original code
