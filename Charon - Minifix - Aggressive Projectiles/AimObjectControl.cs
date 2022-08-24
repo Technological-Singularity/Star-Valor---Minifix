@@ -10,7 +10,8 @@ namespace Charon_SV_Minifix.AggressiveProjectiles {
                 set {
                     if (value != _enabled) {
                         _enabled = value;
-                        Reticle.SetActive(value);
+                        if (Reticle != null)
+                            Reticle.SetActive(value);
                         Predictor.enabled = value;
                     }
                 }
@@ -80,7 +81,7 @@ namespace Charon_SV_Minifix.AggressiveProjectiles {
             lastUpdate = 0;            
 
             foreach (var w in ss.weapons) {
-                if (w == null || w.wRef.compType == WeaponCompType.BeamWeaponObject || w.wRef.compType == WeaponCompType.MissleObject)
+                if (w == null || w.wRef.compType == WeaponCompType.BeamWeaponObject || w.wRef.compType == WeaponCompType.MissileObject)
                     continue;
 
                 var speed = w.projSpeed / w.projectileRef.GetComponent<Rigidbody>().mass;

@@ -31,6 +31,9 @@ Category: Minifix
 
 These plugins are small, standalone fixes that that do not require any other plugins. Plugins that get too complex will be moved out of this category.
 
+- [ ] Modifies save games: **No**
+- [ ] Requires additional mods: **No*
+
 Wider Targeting
 ---
 * Mouseover targeting for ships is more generous, which should make targeting easier for small ships
