@@ -15,6 +15,7 @@ After installing BepInEx, download the latest release of the plugin (the .dll fi
 
 After installing, if your mods don't work, try the following:
 > Navigate to the where you installed BepinEx, and open doorstop_config.ini with a text editor
+
 > Change "ignoreDisableSwitch=false" to "ignoreDisableSwitch=true"
 
 Downloads
@@ -50,6 +51,7 @@ Aggressive Projectiles (WIP)
 * Projectiles have more accurate targeting
 * Battle computer has more accurate lead reticle
 * Point defense weapons will start firing earlier, allowing more reliable interception
+* NPC enemies will chase more accurately (using the same method as projectile aiming)
 
 Miner Gunners
 ---
