@@ -49,7 +49,7 @@ Aggressive Projectiles (WIP)
 * Missiles have more accurate targeting and can compensate for "circle of death" (i.e., where missiles just fly in a circle until they run out of fuel)
 * Missiles use Gunner skill; more pronounced if the same gunner fires multiple missiles in quick succession
 * Projectiles have more accurate targeting
-* Battle computer has more accurate lead reticle
+* Battle computer has more accurate lead reticle and will show separate reticles for different valid weapons
 * Point defense weapons will start firing earlier, allowing more reliable interception
 * NPC enemies will chase more accurately (using the same method as projectile aiming)
 
