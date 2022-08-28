@@ -1,7 +1,7 @@
 ﻿using BepInEx;
 using HarmonyLib;
 
-namespace Charon_SV_Minifix.BlueCollar {
+namespace Charon.StarValor {
     [BepInPlugin(pluginGuid, pluginName, pluginVersion)]
     [BepInProcess("Star Valor.exe")]
     public class Plugin : BaseUnityPlugin {

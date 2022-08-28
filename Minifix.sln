@@ -16,6 +16,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Charon - Minifix - Tractor Spins", "Charon - Minifix - Tractor Spins\Charon - Minifix - Tractor Spins.csproj", "{B3B15AB1-B7B7-4E55-9E41-26A290149D7A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test", "Test\Test.csproj", "{EA357D9D-FECB-4139-971C-892C44E14078}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Charon - Minifix - Multibarrel Memory", "Charon - Minifix - Multibarrel Memory\Charon - Minifix - Multibarrel Memory.csproj", "{DBF9E121-16DF-4336-A747-B83E545A9203}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -38,6 +44,18 @@ Global
 		{1A534923-E358-4B25-925D-38651EB140B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1A534923-E358-4B25-925D-38651EB140B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1A534923-E358-4B25-925D-38651EB140B5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B3B15AB1-B7B7-4E55-9E41-26A290149D7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3B15AB1-B7B7-4E55-9E41-26A290149D7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3B15AB1-B7B7-4E55-9E41-26A290149D7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3B15AB1-B7B7-4E55-9E41-26A290149D7A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EA357D9D-FECB-4139-971C-892C44E14078}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA357D9D-FECB-4139-971C-892C44E14078}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA357D9D-FECB-4139-971C-892C44E14078}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA357D9D-FECB-4139-971C-892C44E14078}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DBF9E121-16DF-4336-A747-B83E545A9203}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DBF9E121-16DF-4336-A747-B83E545A9203}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DBF9E121-16DF-4336-A747-B83E545A9203}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DBF9E121-16DF-4336-A747-B83E545A9203}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

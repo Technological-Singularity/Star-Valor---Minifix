@@ -1,52 +1,18 @@
-﻿using UnityEngine;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
+using static UnityEngine.UI.GridLayoutGroup;
 
-namespace Charon_SV_Minifix.AggressiveProjectiles {
-    class AimObjectControl : MonoBehaviour {
-        class AimContainer {
-            public bool Enabled {
-                get => _enabled;
-                set {
-                    if (value != _enabled) {
-                        _enabled = value;
-                        if (Reticle != null)
-                            Reticle.SetActive(value);
-                        Predictor.enabled = value;
-                    }
-                }
-            }
-            bool _enabled = false;
-
-            public Weapon Weapon { get; private set; }
-            
-            public GameObject Reticle { get; }
-            public TargetPredictor Predictor { get; }
-            public Transform Target { get; private set; }
-
-            public AimContainer(GameObject copyFrom) {
-                Reticle = Instantiate(copyFrom, null);
-                Predictor = Reticle.AddComponent<TargetPredictor>();
-            }
-            public void Initialize(Weapon w) {
-                Weapon = w;
-                Target = w.weaponSlot;
-                Predictor.Initialize(Target);
-            }
-            public void Destroy() {
-                if (Reticle == null)
-                    return;
-                Enabled = false;
-                Object.Destroy(Reticle);
-            }
-        }
+namespace Charon.StarValor.Minifix.AggressiveProjectiles {
+    partial class AimObjectControl : MonoBehaviour {
         Dictionary<(Transform transform, float speed), AimContainer> updateValues = new Dictionary<(Transform transform, float speed), AimContainer>();
         List<KeyValuePair<(Transform transform, float speed), AimContainer>> toRemove = new List<KeyValuePair<(Transform transform, float speed), AimContainer>>();
 
-        public Transform Target => predictor.Target;
+        public Transform Target => targetPredictor.Target;
         public SpaceShip SpaceShip => ss;
 
-        TargetPredictor predictor;
+        TargetPredictor targetPredictor;
+        TargetPredictor thisPredictor;
         PlayerControl control;
         SpaceShip ss;
         Rigidbody rb;
@@ -59,14 +25,20 @@ namespace Charon_SV_Minifix.AggressiveProjectiles {
             if (ss != this.ss)
                 Clear();
             this.ss = ss;
-            this.rb = ss.rb;
+            rb = ss.rb;
             turrets = ss.transform.GetComponentsInChildren<WeaponTurret>().ToDictionary(o => (int)o.turretIndex);
-            predictor = control.gameObject.GetComponent<TargetPredictor>();
-            if (predictor == null) {
-                predictor = control.gameObject.AddComponent<TargetPredictor>();
-                predictor.enabled = true;
+
+            targetPredictor = target.gameObject.GetComponent<TargetPredictor>();
+            if (targetPredictor == null) {
+                targetPredictor = target.gameObject.AddComponent<TargetPredictor>();
+                targetPredictor.enabled = true;
             }
-            predictor.Initialize(target);
+
+            thisPredictor = control.GetComponent<TargetPredictor>();
+            if (thisPredictor == null) {
+                targetPredictor = control.gameObject.AddComponent<TargetPredictor>();
+                targetPredictor.enabled = true;
+            }
         }
         public void Clear() {
             foreach (var container in updateValues.Values)
@@ -78,7 +50,7 @@ namespace Charon_SV_Minifix.AggressiveProjectiles {
                 lastUpdate += Time.deltaTime;
                 return;
             }
-            lastUpdate = 0;            
+            lastUpdate = 0;
 
             foreach (var w in ss.weapons) {
                 if (w == null || w.wRef.compType == WeaponCompType.BeamWeaponObject || w.wRef.compType == WeaponCompType.MissileObject)
@@ -86,51 +58,51 @@ namespace Charon_SV_Minifix.AggressiveProjectiles {
 
                 var speed = w.projSpeed / w.projectileRef.GetComponent<Rigidbody>().mass;
                 var pair = (w.weaponSlot, speed);
-                if (!updateValues.TryGetValue(pair, out var container)) {                    
+                if (!updateValues.TryGetValue(pair, out var container)) {
                     container = new AimContainer(control.AimObj);
-                    container.Initialize(w);
+                    container.Initialize(w, w.weaponSlot);
+                    //container.Initialize(w, ss.transform);
                     updateValues[pair] = container;
-                }           
+                }
 
-                float degreeLimit;
                 bool enabled = !w.manned;
                 if (enabled && w.turretMounted >= 0) {
                     var turret = turrets[w.turretMounted];
+                    float degreeLimit;
                     if (turret.type == WeaponTurretType.limitedArch)
-                        degreeLimit = Mathf.Max(15, turret.degreesLimit / 2);
+                        degreeLimit = turret.degreesLimit / 2;
                     else
                         degreeLimit = 360;
 
-                    float y = Quaternion.LookRotation(predictor.Target.position - w.weaponSlot.position).eulerAngles.y;
-                    float delta = Mathf.Abs(Mathf.DeltaAngle(rb.rotation.eulerAngles.y + turret.baseDegreeRaw, y));
-                    enabled = delta < degreeLimit + 5;
+                    float delta = Quaternion.Angle(w.weaponSlot.rotation, Quaternion.LookRotation(targetPredictor.State.pos - thisPredictor.State.pos));
+                    //enabled = Mathf.Abs(delta) <= degreeLimit;
                 }
                 container.Enabled = enabled;
             }
             foreach (var kvp in updateValues.Where(o => o.Value.Weapon.manned))
                 kvp.Value.Enabled = false;
-            foreach (var kvp in updateValues.Where(o => o.Value.Weapon == null || o.Value.Reticle == null || o.Value.Target != o.Value.Weapon.weaponSlot))
+            foreach (var kvp in updateValues.Where(o => o.Value.Weapon == null || o.Value.Reticle == null || o.Value.Owner != o.Value.Weapon.weaponSlot))
                 toRemove.Add(kvp);
 
             foreach (var kvp in toRemove) {
                 kvp.Value.Destroy();
                 updateValues.Remove(kvp.Key);
             }
-                
+
             toRemove.Clear();
         }
         void FixedUpdate() {
-            foreach(var kvp in updateValues) {
+            foreach (var kvp in updateValues) {
                 var container = kvp.Value;
                 if (container.Reticle == null || container.Weapon == null)
                     continue;
 
                 var (_, speed) = kvp.Key;
-                var (pos, vel, _) = container.Predictor.State;
-                var (_, prediction) = predictor.Predict_OneShot(pos, vel, speed);
+                var (pos, vel, _) = thisPredictor.State;
+                var (_, prediction) = targetPredictor.Predict_OneShot(pos, vel, speed);
 
                 if (prediction != Vector3.zero && container.Enabled)
-                    container.Reticle.transform.position = pos + Vector3.Dot(predictor.State.pos - pos, prediction) * prediction; //predictor.FindClosestPoint(pos, prediction);//weapon.range * prediction + transform.position;
+                    container.position = pos + Vector3.Dot(targetPredictor.State.pos - pos, prediction) * prediction; //predictor.FindClosestPoint(pos, prediction);//weapon.range * prediction + transform.position;
             }
         }
         void OnDisable() {

@@ -1,12 +1,12 @@
 ﻿using BepInEx;
 using HarmonyLib;
-using UnityEngine;
 using System;
-using System.Reflection;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using UnityEngine;
 
-namespace Charon_SV_Minifix.MinerGunners {
+namespace Charon.StarValor.Minifix.MinerGunners {
     [BepInPlugin(pluginGuid, pluginName, pluginVersion)]
     [BepInProcess("Star Valor.exe")]
     public class Plugin : BaseUnityPlugin {
@@ -73,7 +73,7 @@ namespace Charon_SV_Minifix.MinerGunners {
             AssignedCrewMember gunner = null;
             if (___selItemType == 1) {
                 var weapon = ___ss.shipData.weapons[___selItemIndex];
-                gunner = ___ss.crew.GetGunner((int)weapon.slotIndex);
+                gunner = ___ss.crew.GetGunner(weapon.slotIndex);
             }
             else if (___selItemType == 5) {
                 gunner = ___ss.shipData.members[___selItemIndex];
@@ -114,7 +114,7 @@ namespace Charon_SV_Minifix.MinerGunners {
             AssignedCrewMember gunner = null;
             if (___selItemType == 1) {
                 var weapon = ___ss.shipData.weapons[___selItemIndex];
-                gunner = ___ss.crew.GetGunner((int)weapon.slotIndex);
+                gunner = ___ss.crew.GetGunner(weapon.slotIndex);
             }
             else if (___selItemType == 5) {
                 gunner = ___ss.shipData.members[___selItemIndex];
@@ -132,7 +132,7 @@ namespace Charon_SV_Minifix.MinerGunners {
         public static void SearchForATarget(WeaponTurret __instance, SpaceShip ___ss) {
             if (___ss.transform.GetComponent<PlayerControl>() == null)
                 return;
-            if (__instance.notAttackingTime > 0 || (__instance.target != null && __instance.target.GetComponent<Rigidbody>() != null && CanFireAgainst(__instance, __instance.target) >= 0))
+            if (__instance.notAttackingTime > 0 || __instance.target != null && __instance.target.GetComponent<Rigidbody>() != null && CanFireAgainst(__instance, __instance.target) >= 0)
                 return;
 
             //if (__instance.target != null && CanFireAgainst(__instance, __instance.target)
