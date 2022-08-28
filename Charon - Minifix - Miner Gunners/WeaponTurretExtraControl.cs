@@ -1,9 +1,9 @@
-﻿using UnityEngine;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using UnityEngine;
 
-namespace Charon_SV_Minifix.MinerGunners {
+namespace Charon.StarValor.Minifix.MinerGunners {
     public enum ControlMode : int {
         Player = 0,
         AI = 1,
@@ -40,7 +40,7 @@ namespace Charon_SV_Minifix.MinerGunners {
             }
             return control;
         }
-        
+
         static readonly List<(ControlMode control, Stance stance, int targeting)> controlCycle = new List<(ControlMode control, Stance stance, int targeting)>() {
             (ControlMode.Player, Stance.Helpful, (int)TargetMode.None),
             (ControlMode.AI, Stance.Helpful, (int)TargetMode.Neutral | (int)TargetMode.Friendly),
@@ -59,7 +59,7 @@ namespace Charon_SV_Minifix.MinerGunners {
         public void Initialize(SpaceShip ss) {
             this.ss = ss;
             //turrets = new List<WeaponTurret>();
-            var foundTurrets = this.transform.GetComponentsInChildren<WeaponTurret>();
+            var foundTurrets = transform.GetComponentsInChildren<WeaponTurret>();
             foreach (var turret in foundTurrets) {
                 //while (turrets.Count <= turret.turretIndex)
                 //    turrets.Add(null);
@@ -118,10 +118,10 @@ namespace Charon_SV_Minifix.MinerGunners {
             switch (stance) {
                 case Stance.Helpful:  //blue/cyan?
                     if (isMining) text_stance = ColorSys.infoText2;
-                    else text_stance = ColorSys.infoText3; 
+                    else text_stance = ColorSys.infoText3;
                     break;
                 default:  //red?
-                    text_stance = ColorSys.damageText; 
+                    text_stance = ColorSys.damageText;
                     break;
             }
 
@@ -139,7 +139,7 @@ namespace Charon_SV_Minifix.MinerGunners {
             var gunner = ss.crew.GetGunner(turretIndex);
             if (!turretControlMap.TryGetValue(turretIndex, out var code))
                 code = gunner.control + 1;
-            
+
             if (++code >= controlCycle.Count)
                 code = 0;
 
@@ -172,7 +172,7 @@ namespace Charon_SV_Minifix.MinerGunners {
             }
         }
         public void Postload_Restore() {
-            foreach(var kvp in turretControlMap) {
+            foreach (var kvp in turretControlMap) {
                 var gunner = ss.crew.GetGunner(kvp.Key);
                 if (gunner != null)
                     gunner.control = kvp.Value - 1; //restore value so it can be inferred between scenes
@@ -181,13 +181,13 @@ namespace Charon_SV_Minifix.MinerGunners {
         void OnDestroy() {
             Postload_Restore();
         }
-        public void SetTarget(WeaponTurret turret) {          
+        public void SetTarget(WeaponTurret turret) {
             if (!turretControlMap.TryGetValue(turret.turretIndex, out var code)) {
                 var gunner = ss.crew.GetGunner(turret.turretIndex);
                 code = gunner.control + 1;
                 turretControlMap[gunner.slot] = code;
-            }                
-            
+            }
+
             (var control, var stance, var targets) = controlCycle[code];
 
             //These modes are currently handled by the default targeting, so implement them later
@@ -221,7 +221,7 @@ namespace Charon_SV_Minifix.MinerGunners {
                 var allShips = Physics.OverlapSphere(turret.transform.position, harmRange, 8704) //8704 is layer mask for ships
                     .Where(o => CanFireAgainst(turret, o.transform) > 0)
                     .Select(o => o.tag == "Collider" ? o.GetComponent<ColliderControl>().ownerEntity.transform.GetComponent<SpaceShip>() : o.transform.GetComponent<SpaceShip>());
-                
+
                 if (neutral && stance != Stance.Helpful && turret.canDealDmg) {
                     var allNeutral = allShips.Where(o => !ss.ffSys.TargetIsEnemy(o.ffSys) && !ss.ffSys.TargetIsFriendly(o.ffSys) && Vector3.Distance(o.transform.position, ss.transform.position) <= harmRange && !o.status.Get(ShipStatusName.Cloaked));
                     harmTargets.AddRange(allNeutral.Select(o => o.transform));
@@ -233,7 +233,7 @@ namespace Charon_SV_Minifix.MinerGunners {
                 if (repairTargets.Count > 0) {
                     Transform mostDamaged = null;
                     float curPct = float.MaxValue;
-                    foreach(var o in repairTargets) {
+                    foreach (var o in repairTargets) {
                         var pct = o.currHP / o.baseHP;
                         if (pct < curPct) {
                             curPct = pct;
@@ -247,7 +247,7 @@ namespace Charon_SV_Minifix.MinerGunners {
             if (turret.target == null) {
                 Transform closest = null;
                 float curRange = float.MaxValue;
-                foreach(var o in harmTargets) {
+                foreach (var o in harmTargets) {
                     var range = Vector3.SqrMagnitude(ss.transform.position - o.position);
                     if (range < curRange) {
                         curRange = range;

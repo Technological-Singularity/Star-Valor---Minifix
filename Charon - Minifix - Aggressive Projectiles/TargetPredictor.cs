@@ -1,30 +1,22 @@
 ﻿using UnityEngine;
-using System;
-using System.Collections.Generic;
 
-namespace Charon_SV_Minifix.AggressiveProjectiles {
+namespace Charon.StarValor.Minifix.AggressiveProjectiles {
     public class TargetPredictor : MonoBehaviour {
-        public Transform Target { get; private set; } = null;
+        public Transform Target { get; private set; }
         (Vector3 pos, Vector3 vel, Vector3 accel) targetState;
-        (Vector3 pos, Vector3 vel, Vector3 accel) targetStateRaw;
+        (Vector3 pos, Vector3 vel, Vector3 accel) rawState;
         protected const int iir_factor = 5;
         const float missile_time_estimate = 2f;
 
         public (Vector3 pos, Vector3 vel, Vector3 accel) State => targetState;
-
-        public void Initialize(Transform target) {
-            if (target == null) {
-                Target = null;
-                targetState = (Vector3.zero, Vector3.zero, Vector3.zero);
-                return;
-            }
-            var rb = target.GetComponent<Rigidbody>();
-            this.Target = target;
+        void Start() {
+            Target = this.transform;
+            var rb = Target.GetComponent<Rigidbody>();
             if (rb == null)
                 targetState = (Target.position, Vector3.zero, Vector3.zero);
             else
                 targetState = (rb.position, rb.velocity, Vector3.zero);
-            targetStateRaw = targetState;
+            rawState = targetState;
         }
 
         protected virtual void FixedUpdate() {
@@ -34,12 +26,11 @@ namespace Charon_SV_Minifix.AggressiveProjectiles {
             if (Target == null)
                 return;
             var newPos = Target.position;
-            var newVel = (newPos - targetStateRaw.pos) / Time.deltaTime;
-            var newAccel = (newVel - targetStateRaw.vel) / Time.deltaTime;
+            var newVel = (newPos - rawState.pos) / Time.deltaTime;
+            var newAccel = (newVel - rawState.vel) / Time.deltaTime;
 
-            targetStateRaw = (newPos, newVel, newAccel);
+            rawState = (newPos, newVel, newAccel);
 
-            newPos = (newPos + (iir_factor - 1) * targetState.pos) / iir_factor;
             newVel = (newVel + (iir_factor - 1) * targetState.vel) / iir_factor;
             newAccel = (newAccel + (iir_factor - 1) * targetState.accel) / iir_factor;
 
@@ -47,7 +38,8 @@ namespace Charon_SV_Minifix.AggressiveProjectiles {
         }
         Vector3 GetInterceptPoint(Vector3 firstPos, Vector3 firstDir, Vector3 secondPos, Vector3 secondDir) {
             var a = ((secondPos.x - firstPos.x) * secondDir.z - secondDir.x * (secondPos.z - firstPos.z)) / (firstDir.x * secondDir.z - secondDir.x * firstDir.z);
-            return firstPos + a * firstDir;        }
+            return firstPos + a * firstDir;
+        }
 
         public (Vector3 position, Vector3 intercept) Predict_OneShot(Vector3 sourcePosition, Vector3 sourceVelocity, float projectileSpeed) {
             var relPosition = targetState.pos - sourcePosition;
@@ -58,7 +50,7 @@ namespace Charon_SV_Minifix.AggressiveProjectiles {
 
             float towardMag = Vector3.Dot(relPosition, relVelocity);
             float relDistSq = relPosition.sqrMagnitude;
-            float inner = (towardMag * towardMag) + relDistSq * (projectileSpeedSq - targetSpeedSq);
+            float inner = towardMag * towardMag + relDistSq * (projectileSpeedSq - targetSpeedSq);
 
             if (inner <= 0) { //projectile too slow, no solution
                 //Plugin.Log.LogWarning("NS " + towardMag + " " + relDistSq + " " + targetSpeedSq + " " + projectileSpeedSq + " " + relVelocity + " " + sourceVelocity);
@@ -115,7 +107,7 @@ namespace Charon_SV_Minifix.AggressiveProjectiles {
             //var relSpeed = sourceAccel * missile_time_estimate; //this is wrong, but assume updates will catch errors
             var (_, intercept) = Predict_OneShot(sourcePosition, sourceVelocity, sourceAccel * missile_time_estimate);
             if (intercept == Vector3.zero) {
-                intercept = (targetState.pos - sourcePosition) + (targetState.vel - sourceVelocity) * missile_time_estimate;
+                intercept = targetState.pos - sourcePosition + (targetState.vel - sourceVelocity) * missile_time_estimate;
                 intercept.Normalize();
             }
             if (intercept == Vector3.zero) {

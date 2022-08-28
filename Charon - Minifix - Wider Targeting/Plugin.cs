@@ -1,12 +1,10 @@
 ﻿using BepInEx;
 using HarmonyLib;
-using UnityEngine;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Rewired;
+using System.Linq;
+using UnityEngine;
 
-namespace Charon_SV_Minifix.WiderTargeting {
+namespace Charon.StarValor.Minifix.WiderTargeting {
     [BepInPlugin(pluginGuid, pluginName, pluginVersion)]
     [BepInProcess("Star Valor.exe")]
     public class Plugin : BaseUnityPlugin {
@@ -19,7 +17,7 @@ namespace Charon_SV_Minifix.WiderTargeting {
             Log = Logger;
             Harmony.CreateAndPatchAll(typeof(Plugin));
         }
-        
+
         const float scanRadius = 12;
         const float requiredOverTime = 0.25f;
         static float playerScanPeriod = 0.05f;
@@ -36,13 +34,13 @@ namespace Charon_SV_Minifix.WiderTargeting {
         public static void PlayerControl_NearbyMouseOver(PlayerControl __instance, Vector3 ___mousePosition, SpaceShip ___ss, Player ___player) {
             var tryingAsteroid = ___player.GetButton("Shift") && ___player.GetButtonDown("Target Any");
             var mouseDown = Input.GetMouseButtonDown(0);
-            if (tryingAsteroid && !__instance.target.CompareTag("Asteroid")) {
+            if (tryingAsteroid && (__instance.target == null || !__instance.target.CompareTag("Asteroid"))) {
                 const int layerMask = 1024;
                 var toTarget = Physics.OverlapSphere(___mousePosition, 160 + ___ss.shipClass * 40, layerMask)
                     .Where(o => o.CompareTag("Asteroid"))
                     .Select(o => (o.transform, Vector3.SqrMagnitude(o.transform.position - ___mousePosition)))
                     .Aggregate(
-                        ((Transform)null, (float)float.MaxValue), 
+                        ((Transform)null, (float)float.MaxValue),
                         (closest, candidate) => candidate.Item2 < closest.Item2 ? candidate : closest)
                     .Item1;
                 if (toTarget != null)
@@ -85,7 +83,7 @@ namespace Charon_SV_Minifix.WiderTargeting {
             }
 
             if (entityLast != null && entityTimeLast >= requiredOverTime) {
-                entityTimeLast = requiredOverTime;                
+                entityTimeLast = requiredOverTime;
                 __instance.SetTarget(entityLast.transform);
             }
         }

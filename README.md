@@ -39,6 +39,12 @@ These plugins are small, standalone fixes that that do not require any other plu
 - [ ] Modifies save games: **No**
 - [ ] Requires additional mods: **No**
 
+Multibarrel Memory
+---
+* Alternate fire mode for turrets (i.e., simultaneous multibarrel shots - available by right-clicking a weapon turret slot) will persist after swapping equipment
+* Alternate fire mode for turrets will persist through warps
+* Alternate fire mode for turrets will persist through save/load games - **note: this adds an additional file to your save directory**
+
 Wider Targeting
 ---
 * Mouseover targeting for ships is more generous, which should make targeting easier for small ships
