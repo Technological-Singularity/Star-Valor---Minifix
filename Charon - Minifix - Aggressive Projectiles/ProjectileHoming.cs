@@ -31,10 +31,12 @@ namespace Charon.StarValor.Minifix.AggressiveProjectiles {
 
         const float maxVelocityDelta = 200;
         float cumulativeError = 0;
+        float gunnerLevelEffective = 0;
         float controlCountAddedError = float.NaN;
-        float decayCoeff = 0.999f;
+        float decayCoeff = 0.990f;
+        float errorDirection;
+        float errorTarget;
         bool trackActive = false;
-        Vector3 facingSmoothed;
 
         float gunnerLevel;
         Tracker gunnerControlTracker;
@@ -45,10 +47,12 @@ namespace Charon.StarValor.Minifix.AggressiveProjectiles {
             this.ss = ss;
             this.weapon = weapon;
 
-            targetPredictor = target.GetComponent<TargetPredictor>();
-            if (targetPredictor == null) {
-                targetPredictor = target.gameObject.AddComponent<TargetPredictor>();
-                targetPredictor.enabled = true;
+            if (target != null) {
+                targetPredictor = target.GetComponent<TargetPredictor>();
+                if (targetPredictor == null) {
+                    targetPredictor = target.gameObject.AddComponent<TargetPredictor>();
+                    targetPredictor.enabled = true;
+                }
             }
 
             if (transform.position.y != 0)
@@ -58,14 +62,12 @@ namespace Charon.StarValor.Minifix.AggressiveProjectiles {
             maxAccel = 5 * speed;
             maxTurnRate = turnRate;
 
-            if (decayCoeff > 0)
-                Decayer.AddDecayer(owner.gameObject, controlledProjectiles, decayCoeff);
-
             var ownerRB = owner.gameObject.GetComponent<Rigidbody>();
             rb.velocity += 0.2f * speed * transform.forward;
             currentVelocity = rb.velocity;
-            rb.rotation = Quaternion.LookRotation(rb.velocity);
-            facingSmoothed = rb.velocity.normalized;
+            (errorDirection, errorTarget) = RandomNormal();
+            if (Mathf.Sign(errorDirection) != Mathf.Sign(errorTarget))
+                errorDirection *= -1;
 
             if (ss == null)
                 return;
@@ -89,9 +91,12 @@ namespace Charon.StarValor.Minifix.AggressiveProjectiles {
                 crewId = gunner.crewMemberID;
                 gunnerLevel = gunner.crewMember.GetSkillLevel(CrewPosition.Gunner, ss);
             }
-            controlCountAddedError = 20f / Mathf.Max(1, (20 + gunnerLevel + (gunnerLevel <= 0 ? -10 : 0)));
+
             gunnerControlTracker = Tracker.GetTracker(crewId);
-            gunnerControlTracker.Ref(controlCountAddedError);
+            if (trackActive) {
+                controlCountAddedError = 20f / Mathf.Max(1, (20 + gunnerLevel + (gunnerLevel <= 0 ? -10 : 0)));
+                gunnerControlTracker.Ref(controlCountAddedError);
+            }
         }
         (float n1, float n2) RandomNormal() {
             var (u1, u2) = (Random.Range(0f, 1f), Random.Range(0f, 1f));
@@ -103,42 +108,59 @@ namespace Charon.StarValor.Minifix.AggressiveProjectiles {
             if (rb == null)
                 return Quaternion.identity;
 
-            var gunnerLevelEffective = gunnerLevel - 3 * gunnerControlTracker.Value + (gunnerLevel <= 0 ? -10 : 0);
+            gunnerLevelEffective = gunnerLevel - 3 * gunnerControlTracker.Value + (gunnerLevel <= 0 ? -10 : 0);
             var sideways = trackActive ? Vector3.Cross(targetPredictor.State.vel - rb.velocity, (targetPredictor.State.pos - rb.position).normalized).magnitude : 0;
-            var angle = trackActive ? Quaternion.Angle(rb.rotation, Quaternion.LookRotation(rb.position - targetPredictor.State.pos)) : 180;
-            var baseMag = sideways + Mathf.Abs(angle);
-            var error = 1f;
+            var angle = trackActive ? Quaternion.Angle(rb.rotation, Quaternion.LookRotation(rb.position - targetPredictor.State.pos)) : Mathf.Clamp(45 - 3 * gunnerLevelEffective, 15, 90);
+            var baseMag = sideways + Mathf.Abs(angle) / 10;
+            var errorMag = 1f;
             if (gunnerLevelEffective > 20) {
-                error -= 0.10f * (1f - 1f / (gunnerLevelEffective - 20));
+                errorMag -= 0.05f * (1f - 1f / (gunnerLevelEffective - 20));
                 gunnerLevelEffective = 20;
             }
             if (gunnerLevelEffective > 10) {
-                error -= 0.35f * (gunnerLevelEffective - 10) / 10f;
+                errorMag -= 0.30f * (gunnerLevelEffective - 10) / 10f;
                 gunnerLevelEffective = 10;
             }
-            error -= 0.55f * gunnerLevelEffective / 10f;
-            var (rand, _) = RandomNormal();
+            errorMag -= 0.65f * gunnerLevelEffective / 10f;
+
+            //var (rand, _) = RandomNormal();
             //var rand = Random.Range(-1f, 1f);
-            var aimError = rand * error * baseMag;
-            aimError = Mathf.Clamp(aimError, -270, 270);
+            //var aimError = rand * errorMag * baseMag;
+            //aimError = Mathf.Clamp(aimError, -180, 180);
+            //var filterFactor = Mathf.Max(0, gunnerLevelEffective / 3 + 2);
+            //cumulativeError = (filterFactor * cumulativeError + aimError) / (filterFactor + 1);
 
-            var filterFactor = Mathf.Max(0, gunnerLevelEffective / 5 + 2f);
-            cumulativeError = (filterFactor * cumulativeError + aimError + 0) / (filterFactor + 2);
+            cumulativeError += errorDirection * Time.deltaTime * 10;
+            if (Mathf.Abs(cumulativeError) >= Mathf.Abs(errorTarget)) {
+                (errorDirection, errorTarget) = RandomNormal();
+                if (Mathf.Sign(cumulativeError) == Mathf.Sign(errorTarget))
+                    errorTarget *= -1;
+                if (Mathf.Sign(errorDirection) != Mathf.Sign(errorTarget))
+                    errorDirection *= -1;
+            }
 
-            return Quaternion.Euler(0, cumulativeError, 0);
+            return Quaternion.Euler(0, cumulativeError * errorMag * baseMag, 0);
         }
+
         void FixedUpdate() {
             if (rb == null) {
                 enabled = false;
                 return;
             }
 
-            if (decayCoeff > 1)
-                controlCountAddedError *= decayCoeff;
+            if (trackActive && decayCoeff < 1) {
+                var orig = controlCountAddedError;
+                var coeff = decayCoeff;
+                if (orig <= gunnerLevelEffective)
+                    coeff = 1 - (1 - coeff) / 20;
+                controlCountAddedError *= coeff;
+                gunnerControlTracker.Value -= orig - controlCountAddedError;
+            }
 
-            if (trackActive && targetPredictor == null) {
+            if (trackActive && (rb == null || targetPredictor == null)) {
                 trackActive = false;
                 gunnerControlTracker?.Deref(controlCountAddedError);
+                controlCountAddedError = 0;
             }
 
             var effectiveGunnerLevel = gunnerLevel + (gunnerLevel <= 0 ? -10 : 0);
@@ -164,12 +186,13 @@ namespace Charon.StarValor.Minifix.AggressiveProjectiles {
 
             var wantFacing = targetPredictor == null ? rb.transform.forward : targetPredictor.Predict_SelfPropelled(rb.position, rb.velocity, maxAccel);
             var error = CalculateAimError();
-            var facing = error * wantFacing;
-            facingSmoothed = (59 * facingSmoothed + facing) / 60;
-            var newFacing = Quaternion.LookRotation(facingSmoothed);
+            var newFacing = error * wantFacing;
+
+            //var smoothingFactor = Mathf.Clamp(5 * gunnerLevelEffective, 0, 60);
+            //errorSmoothed = Vector3.Slerp(errorSmoothed, newFacing, 1 / (smoothingFactor + 1));
 
             var maxTurn = effectiveTurnRate * Time.deltaTime;
-            var newRotation = Quaternion.RotateTowards(transform.rotation, newFacing, maxTurn);
+            var newRotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(newFacing), maxTurn);
             var newAngle = Quaternion.Angle(newRotation, transform.rotation);
 
             if (Mathf.Abs(maxTurn - newAngle) / maxTurn < maxAngleCutoffRatio) {
@@ -186,13 +209,11 @@ namespace Charon.StarValor.Minifix.AggressiveProjectiles {
             transform.rotation = newRotation;
         }
         void OnDestroy() {
-            enabled = false;
             if (trackActive) {
                 trackActive = false;
                 gunnerControlTracker?.Deref(controlCountAddedError);
+                controlCountAddedError = 0;
             }
-            if (crewId < 0)
-                return;
         }
     }
 }

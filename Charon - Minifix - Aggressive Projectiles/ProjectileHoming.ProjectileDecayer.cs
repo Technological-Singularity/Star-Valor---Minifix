@@ -23,8 +23,6 @@ namespace Charon.StarValor.Minifix.AggressiveProjectiles {
                 lastFrame = Time.frameCount;
                 foreach (var kvp in trackedValues)
                     kvp.Value.Value *= Coefficient;
-                if (trackedValues.Count == 0)
-                    return;
             }
         }
     }

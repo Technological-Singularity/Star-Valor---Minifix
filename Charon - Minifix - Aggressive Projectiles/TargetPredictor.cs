@@ -9,7 +9,7 @@ namespace Charon.StarValor.Minifix.AggressiveProjectiles {
         const float missile_time_estimate = 2f;
 
         public (Vector3 pos, Vector3 vel, Vector3 accel) State => targetState;
-        void Start() {
+        void Awake() {
             Target = this.transform;
             var rb = Target.GetComponent<Rigidbody>();
             if (rb == null)
@@ -36,12 +36,12 @@ namespace Charon.StarValor.Minifix.AggressiveProjectiles {
 
             targetState = (newPos, newVel, newAccel);
         }
-        Vector3 GetInterceptPoint(Vector3 firstPos, Vector3 firstDir, Vector3 secondPos, Vector3 secondDir) {
+        public static Vector3 GetInterceptPoint(Vector3 firstPos, Vector3 firstDir, Vector3 secondPos, Vector3 secondDir) {
             var a = ((secondPos.x - firstPos.x) * secondDir.z - secondDir.x * (secondPos.z - firstPos.z)) / (firstDir.x * secondDir.z - secondDir.x * firstDir.z);
             return firstPos + a * firstDir;
         }
 
-        public (Vector3 position, Vector3 intercept) Predict_OneShot(Vector3 sourcePosition, Vector3 sourceVelocity, float projectileSpeed) {
+        public Vector3 Predict_OneShot(Vector3 sourcePosition, Vector3 sourceVelocity, float projectileSpeed) {
             var relPosition = targetState.pos - sourcePosition;
             var relVelocity = targetState.vel - sourceVelocity;
 
@@ -54,7 +54,7 @@ namespace Charon.StarValor.Minifix.AggressiveProjectiles {
 
             if (inner <= 0) { //projectile too slow, no solution
                 //Plugin.Log.LogWarning("NS " + towardMag + " " + relDistSq + " " + targetSpeedSq + " " + projectileSpeedSq + " " + relVelocity + " " + sourceVelocity);
-                return (Vector3.zero, Vector3.zero);
+                return Vector3.zero;
             }
 
             float sqrt = Mathf.Sqrt(inner);
@@ -66,21 +66,22 @@ namespace Charon.StarValor.Minifix.AggressiveProjectiles {
             //if (invTimeP < 0)
             //    invTimeP *= -1;
 
-            Vector3 position = targetState.pos + targetState.vel / invTimeP;
             Vector3 intercept = (invTimeP * relPosition + relVelocity).normalized;
-            Vector3 velVector = targetState.vel;
-            if (velVector.magnitude < 1)
-                velVector = Target.forward;
-            velVector.Normalize();
-            Vector3 intersectPos;
 
-            if (Mathf.Abs(Vector3.Dot(velVector, intercept)) > 0.95f)
-                intersectPos = position;
-            else
-                intersectPos = GetInterceptPoint(sourcePosition, intercept, targetState.pos, velVector);
+            //Vector3 position = targetState.pos + targetState.vel / invTimeP;
+            //Vector3 velVector = targetState.vel;
+            //if (velVector.magnitude < 1)
+            //    velVector = Target.forward;
+            //velVector.Normalize();
+            //Vector3 intersectPos;
+
+            //if (Mathf.Abs(Vector3.Dot(velVector, intercept)) > 0.95f)
+            //    intersectPos = position;
+            //else
+            //    intersectPos = GetInterceptPoint(sourcePosition, intercept, targetState.pos, velVector);
             //intersectPos = (intersectPos + sourcePosition) / 2;
 
-            return (intersectPos, intercept);
+            return intercept;
 
 
             //var relPosition = targetPosition - sourcePosition;
@@ -104,8 +105,7 @@ namespace Charon.StarValor.Minifix.AggressiveProjectiles {
             //return targetPosition + relVelocity * expectedTime + relAcceleration / 2 * expectedTime * expectedTime;
         }
         public Vector3 Predict_SelfPropelled(Vector3 sourcePosition, Vector3 sourceVelocity, float sourceAccel) {
-            //var relSpeed = sourceAccel * missile_time_estimate; //this is wrong, but assume updates will catch errors
-            var (_, intercept) = Predict_OneShot(sourcePosition, sourceVelocity, sourceAccel * missile_time_estimate);
+            var intercept = Predict_OneShot(sourcePosition, sourceVelocity, sourceAccel * missile_time_estimate);
             if (intercept == Vector3.zero) {
                 intercept = targetState.pos - sourcePosition + (targetState.vel - sourceVelocity) * missile_time_estimate;
                 intercept.Normalize();

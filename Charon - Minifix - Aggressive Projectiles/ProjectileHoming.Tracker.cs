@@ -19,20 +19,20 @@ namespace Charon.StarValor.Minifix.AggressiveProjectiles {
 
             public int Key { get; }
             public float Value;
-            public int Refs { get; private set; }
+            public int RefCount { get; private set; }
             public void Ref(float addedValue) {
                 if (!float.IsNaN(addedValue))
                     Value += addedValue;
                 Ref();
             }
-            public void Ref() => ++Refs;
+            public void Ref() => ++RefCount;
             public void Deref(float addedValue) {
                 if (!float.IsNaN(addedValue))
                     Value -= addedValue;
                 Deref();
             }
             public void Deref() {
-                if (--Refs == 0)
+                if (--RefCount == 0)
                     controlledProjectiles.Remove(Key);
             }
             Tracker(int key) => Key = key;

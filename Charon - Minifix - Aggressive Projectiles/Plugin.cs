@@ -33,13 +33,13 @@ namespace Charon.StarValor.Minifix.AggressiveProjectiles {
         [HarmonyPrefix]
         public static bool PlayerControl_ShowAimObject(PlayerControl __instance, SpaceShip ___ss) {
             var control = __instance.GetComponent<AimObjectControl>();
-            if (__instance.target != null && ___ss.stats.hasAimObj) {
+            if (/*__instance.target != null &&*/ ___ss.stats.hasAimObj) {
                 if (control == null)
                     control = __instance.gameObject.AddComponent<AimObjectControl>();
-                if (!control.enabled || ___ss != control.SpaceShip || control.Target != __instance.target) {
+                if (!control.enabled || ___ss != control.SpaceShip /*|| control.Target != __instance.target*/) {
                     if (___ss != control.SpaceShip)
                         control.Clear();
-                    control.Initialize(__instance, ___ss, __instance.target);
+                    control.Initialize(__instance, ___ss/*, __instance.target*/);
                     control.enabled = true;
                 }
             }
@@ -61,7 +61,7 @@ namespace Charon.StarValor.Minifix.AggressiveProjectiles {
 
         [HarmonyPatch(typeof(AIControl), "AimAtTarget")]
         [HarmonyPrefix]
-        public static bool AIControl_AimAtTarget(ref bool __result, AIControl __instance, GameObject ___aimTarget, float ___aimErrorX, float ___aimErrorZ, bool ___firingBeamWeapon, Transform ___tf, Rigidbody ___rb, SpaceShip ___ss, ref Quaternion ___targetRotation) {
+        public static bool AIControl_AimAtTarget(ref bool __result, AIControl __instance, GameObject ___aimTarget, float ___aimErrorX, float ___aimErrorZ, bool ___firingBeamWeapon, Rigidbody ___rb, SpaceShip ___ss, ref Quaternion ___targetRotation) {
             if (__instance.target == null) {
                 __result = false;
                 return false;
@@ -70,13 +70,6 @@ namespace Charon.StarValor.Minifix.AggressiveProjectiles {
                 __result = true;
                 return false;
             }
-
-            //var player = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerControl>();
-            //if (!reticles.TryGetValue(__instance, out var reticle)) {
-            //    reticle = Instantiate(player.AimObj, ___aimTarget.transform);
-            //    reticles[__instance] = reticle;
-            //    reticle.SetActive(true);
-            //}
 
             Vector3 prediction;
             var error = new Vector3(___aimErrorX, 0, ___aimErrorZ);
@@ -98,7 +91,7 @@ namespace Charon.StarValor.Minifix.AggressiveProjectiles {
                 }
 
                 var (targetPos, targetVel, _) = targetPredictor.State;
-                (_, prediction) = thisPredictor.Predict_OneShot(targetPos + error, targetVel, __instance.currWeaponSpeed);
+                prediction = thisPredictor.Predict_OneShot(targetPos + error, targetVel, __instance.currWeaponSpeed);
                 if (prediction == Vector3.zero) {
                     var d = (thisPredictor.State.pos - targetPos).magnitude / __instance.currWeaponSpeed;
                     prediction = __instance.target.position + d * (__instance.target.GetComponent<Rigidbody>().velocity - targetVel);
@@ -107,6 +100,16 @@ namespace Charon.StarValor.Minifix.AggressiveProjectiles {
                     prediction = targetPos + Vector3.Dot(targetPos - thisPredictor.State.pos, prediction) * prediction;
                 }
             }
+
+            var relP = ___ss.transform.position - prediction;            
+            var hits = Physics.RaycastAll(___ss.transform.position, relP, 2 * relP.magnitude, 1 << __instance.target.gameObject.layer, QueryTriggerInteraction.Ignore);
+            foreach(var hit in hits) {
+                if (__instance.target == hit.transform || (hit.transform.CompareTag("Collider") && __instance.target == hit.transform.GetComponent<ColliderControl>().ownerEntity.transform)) {
+                    prediction = hit.point;
+                    break;
+                }                
+            }
+
             ___aimTarget.transform.position = prediction;
             ___targetRotation = Quaternion.LookRotation(prediction - __instance.transform.position);
             ___ss.Turn(___targetRotation);
@@ -117,27 +120,49 @@ namespace Charon.StarValor.Minifix.AggressiveProjectiles {
             return false;
         }
 
+        public static List<(Transform transform, int layer)> SetLayers(Transform transform, int layerMask, int newLayer) {
+            var list = new List<(Transform, int)>();
+            void _setLayers(Transform curTransform) {
+                var thisLayer = curTransform.gameObject.layer;
+                if ((layerMask >> thisLayer & 1) == 1) {
+                    list.Add((curTransform, thisLayer));
+                    curTransform.gameObject.layer = newLayer;
+                }
+                foreach (Transform child in curTransform)
+                    _setLayers(child);
+            }
+            _setLayers(transform);
+            return list;
+        }
+        public static void ResetLayers(List<(Transform, int)> list) {
+            foreach (var (transform, layer) in list)
+                transform.gameObject.layer = layer;
+        }
 
         [HarmonyPatch(typeof(WeaponTurret), "FindTarget")]
         [HarmonyPrefix]
         public static void FindTarget(Transform ___parentShipTrans, Transform ___tf, ref List<ScanObject> objs, bool smallObject) {
             //filter the initial list so that only objects that are currently in LOF can actualy be targeted
-            const int layerMask = 9728;
-            var colliders = ___parentShipTrans.GetComponents<Collider>().Select(o => (o, o.enabled));
-            foreach (var (collider, enabled) in colliders)
-                collider.enabled = false;
+            const int layerMask = (1 << 8) | (1 << 9) | (1 << 13) | (1 << 14) | (1 << 16); //these are the objects that can occlude a shot
+
+            var oldLayers = SetLayers(___parentShipTrans, layerMask, 2); //ignore raycast layer
+
             var newList = new List<ScanObject>();
             foreach (var o in objs) {
                 if (o == null || o.trans == null)
                     continue;
+                if (o.trans.CompareTag("Projectile")) {
+                    newList.Add(o);
+                    continue;
+                }
                 var relP = o.trans.position - ___tf.position;
-                var mag = 2 * relP.magnitude;
-                var wasHit = Physics.Raycast(___tf.position, relP.normalized, out var raycastHit, 2 * relP.magnitude, layerMask, QueryTriggerInteraction.Ignore);
-                if (wasHit && raycastHit.transform == o.trans)
+                var wasHit = Physics.Raycast(___tf.position, relP.normalized, out var hitInfo, 2 * relP.magnitude, layerMask, QueryTriggerInteraction.Ignore);
+                if (wasHit && hitInfo.transform == o.trans)
                     newList.Add(o);
             }
-            foreach (var (collider, enabled) in colliders)
-                collider.enabled = true;
+
+            ResetLayers(oldLayers);
+
             objs = newList;
         }
 
@@ -187,7 +212,7 @@ namespace Charon.StarValor.Minifix.AggressiveProjectiles {
 
                 var (_, parentVel, _) = thisPredictor.State;
                 var pos = __instance.transform.position;
-                (_, prediction) = targetPredictor.Predict_OneShot(pos + error, parentVel, __instance.currWeaponSpeed);
+                prediction = targetPredictor.Predict_OneShot(pos + error, parentVel, __instance.currWeaponSpeed);
                 if (prediction == Vector3.zero) {
                     var d = (targetPredictor.State.pos - pos).magnitude / __instance.currWeaponSpeed;
                     prediction = __instance.target.position + d * (targetPredictor.State.vel - parentVel)  + error;
@@ -223,10 +248,10 @@ namespace Charon.StarValor.Minifix.AggressiveProjectiles {
         [HarmonyPrefix]
         public static void WeaponTurret_CanFireAgainst_FixRange(WeaponTurret __instance, Transform targetTrans, ref float ___desiredDistance, ref float __state, SpaceShip ___ss) {
             __state = ___desiredDistance;
-            if (targetTrans.tag == "Projectile") {
-                var component = __instance.GetComponent<WeaponSlotExtraData>();
+            if (targetTrans.CompareTag("Projectile")) {
+                var component = ___ss.GetComponent<WeaponSlotExtraData>();
                 if (component == null) {
-                    component = __instance.gameObject.AddComponent<WeaponSlotExtraData>();
+                    component = ___ss.gameObject.AddComponent<WeaponSlotExtraData>();
                     component.Initialize(___ss);
                     component.Refresh();
                 }
@@ -234,13 +259,14 @@ namespace Charon.StarValor.Minifix.AggressiveProjectiles {
                 var targetRB = targetTrans.GetComponent<Rigidbody>();
                 if (targetRB == null)
                     targetRB = ___ss.rb;
+
                 var relPosition = targetTrans.position - __instance.transform.position;
                 var relVelocity = targetRB.velocity - ___ss.rb.velocity;
                 var newDistance = component[__instance.turretIndex, WeaponSlotExtraData.WeaponStatType.PD].GetEffectiveRange(relPosition, relVelocity);
 
                 ___desiredDistance = newDistance;
             }
-            //add more later if appropriate
+            //add more target types later if appropriate; this currently only affects point defense weapons
         }
 
         [HarmonyPatch(typeof(WeaponTurret), "CanFireAgainst")]
