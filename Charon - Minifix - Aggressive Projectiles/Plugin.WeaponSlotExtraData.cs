@@ -1,10 +1,15 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using UnityEngine;
+using System;
 
 namespace Charon.StarValor.Minifix.AggressiveProjectiles {
     public partial class Plugin {
         class WeaponSlotExtraData : MonoBehaviour {
+            static FieldInfo gunTip = typeof(Weapon).GetField("gunTip", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            static FieldInfo extraBarrels = typeof(Weapon).GetField("extraBarrels", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
             public enum WeaponStatType : int {
                 Normal = 0,
                 PD = 1,
@@ -53,16 +58,55 @@ namespace Charon.StarValor.Minifix.AggressiveProjectiles {
 
             SpaceShip ss;
             List<List<WeaponStat>> weaponStats = new List<List<WeaponStat>>();
+            List<(Transform[] barrels, Func<int, Transform> gunTipGetter, Func<int, Transform[]> extraBarrelsGetter)> barrelInfo = new List<(Transform[] barrels, Func<int, Transform> gunTipGetter, Func<int, Transform[]> extraBarrelsGetter)>();
+
             public WeaponStat this[int slotId, WeaponStatType type] => weaponStats[slotId][(int)type];
+            public Transform[] GetBarrels(int slotId) {
+                var (barrels, getGunTip, getExtra) = barrelInfo[slotId];
+                if (barrels[0] != null)
+                    return barrels;
+
+                barrels[0] = getGunTip(slotId);
+
+                int bidx = 0;
+                foreach (var o in getExtra(slotId))
+                    barrels[++bidx] = o;
+
+                return barrels;
+            }
 
             public void Initialize(SpaceShip ss) {
                 weaponStats.Clear();
+                barrelInfo.Clear();
                 this.ss = ss;
+
                 for (int i = 0; i < ss.weaponSlots.childCount; ++i) {
                     var stats = new List<WeaponStat>();
-                    foreach (WeaponStatType type in System.Enum.GetValues(typeof(WeaponStatType)))
+                    foreach (WeaponStatType type in Enum.GetValues(typeof(WeaponStatType)))
                         stats.Add(new WeaponStat(type));
                     weaponStats.Add(stats);
+
+                    var weaponSlot = ss.weaponSlots.GetChild(i);
+                    var turret = weaponSlot.GetComponent<WeaponTurret>();
+
+                    var isGunTip = weaponSlot.Find("GunTip") != null;
+                    var isTurret = weaponSlot.GetComponent<WeaponTurret>() != null;
+                    var allBarrels = new Transform[turret == null ? 1 : 1 + (turret.extraBarrels?.Length ?? 0)];
+
+                    Func<int, Transform> gunTipGetter;
+                    if (isGunTip)
+                        gunTipGetter = (idx) => ss.weaponSlots.GetChild(idx).Find("GunTip");
+                    else
+                        gunTipGetter = (idx) => ss.weaponSlots.GetChild(idx);
+
+                    Func<int, Transform[]> extraBarrelsGetter;
+                    if (isTurret)
+                        extraBarrelsGetter = (idx) => ss.weaponSlots.GetChild(idx).GetComponent<WeaponTurret>().extraBarrels;
+                    else
+                        extraBarrelsGetter = (idx) => null;
+
+
+                    barrelInfo.Add((allBarrels, gunTipGetter, extraBarrelsGetter));
                 }
             }
             public void Refresh() {

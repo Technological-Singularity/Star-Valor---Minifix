@@ -140,13 +140,14 @@ namespace Charon.StarValor.Minifix.AggressiveProjectiles {
                 transform.gameObject.layer = layer;
         }
 
+        const int targetLayerMask = (1 << 8) | (1 << 9) | (1 << 13) | (1 << 14) | (1 << 16); //these are the objects that can occlude a shot
+
         [HarmonyPatch(typeof(WeaponTurret), "FindTarget")]
         [HarmonyPrefix]
         public static void FindTarget(Transform ___parentShipTrans, Transform ___tf, ref List<ScanObject> objs, bool smallObject) {
             //This fix was designed to fix the Taurus laser targeting - it needs to be fixed so it doesn't stop e.g. firing at an asteroid behind another asteroid
 
             ////filter the initial list so that only objects that are currently in LOF can actualy be targeted
-            //const int layerMask = (1 << 8) | (1 << 9) | (1 << 13) | (1 << 14) | (1 << 16); //these are the objects that can occlude a shot
 
             //var oldLayers = SetLayers(___parentShipTrans, layerMask, 2); //ignore raycast layer
 
@@ -251,22 +252,91 @@ namespace Charon.StarValor.Minifix.AggressiveProjectiles {
         [HarmonyPrefix]
         public static void WeaponTurret_CanFireAgainst_FixRange(WeaponTurret __instance, Transform targetTrans, ref float ___desiredDistance, ref float __state, SpaceShip ___ss) {
             __state = ___desiredDistance;
-            if (true/*targetTrans.CompareTag("Projectile")*/) {
-                var component = ___ss.GetComponent<WeaponSlotExtraData>();
-                if (component == null) {
-                    component = ___ss.gameObject.AddComponent<WeaponSlotExtraData>();
-                    component.Initialize(___ss);
-                    component.Refresh();
-                }
-                var newDistance = component[__instance.turretIndex, WeaponSlotExtraData.WeaponStatType.PD].GetEffectiveRange(targetTrans, ___ss.rb.position, ___ss.rb.velocity);
-                ___desiredDistance = newDistance;
+            var turretSlots = ___ss.GetComponent<WeaponSlotExtraData>();
+            if (turretSlots == null) {
+                turretSlots = ___ss.gameObject.AddComponent<WeaponSlotExtraData>();
+                turretSlots.Initialize(___ss);
+                turretSlots.Refresh();
+            }
+            if (targetTrans.CompareTag("Projectile"))
+                ___desiredDistance = turretSlots[__instance.turretIndex, WeaponSlotExtraData.WeaponStatType.PD].GetEffectiveRange(targetTrans, ___ss.rb.position, ___ss.rb.velocity);
+        }
+
+        static LineRenderer[] lines = null;
+        static void InitializeLine() {
+            lines = new LineRenderer[10];
+            for (int i = 0; i < 10; ++i) {
+                GameObject go = new GameObject();
+                lines[i] = go.AddComponent<LineRenderer>();
+            }
+
+            foreach (var lr in lines) {
+                lr.alignment = LineAlignment.View;
+                lr.colorGradient = new Gradient() {
+                    mode = GradientMode.Blend,
+                    colorKeys = new GradientColorKey[] { new GradientColorKey(Color.white, 0), new GradientColorKey(Color.white, 1) },
+                    alphaKeys = new GradientAlphaKey[] { new GradientAlphaKey(1, 0), new GradientAlphaKey(1, 1) }
+                };
+                lr.endColor = Color.red;
+                lr.startColor = Color.red;
+                lr.positionCount = 2;
+                lr.widthCurve = AnimationCurve.Constant(0, 1, 1);
+                lr.startWidth = 1f;
+                lr.endWidth = 0.2f;
+                lr.textureMode = LineTextureMode.RepeatPerSegment;
+                lr.material = ObjManager.GetObj("Effects/LineRenderObj").GetComponent<LineRenderer>().material;
             }
         }
 
         [HarmonyPatch(typeof(WeaponTurret), "CanFireAgainst")]
         [HarmonyPostfix]
-        public static void WeaponTurret_CanFireAgainst_FixRangeCleanup(Transform targetTrans, ref float ___desiredDistance, ref float __state) {
+        public static void WeaponTurret_CanFireAgainst_FixRangeCleanup(Transform targetTrans, WeaponTurret __instance, ref float __result, ref float ___desiredDistance, float __state, SpaceShip ___ss) {
             ___desiredDistance = __state;
+
+            if (__result > 0)
+                return;
+
+            if (!___ss.CompareTag("Player"))
+                return;
+
+            if (lines == null)
+                InitializeLine();
+
+            var turretSlots = ___ss.GetComponent<WeaponSlotExtraData>();
+            if (turretSlots == null) {
+                turretSlots = ___ss.gameObject.AddComponent<WeaponSlotExtraData>();
+                turretSlots.Initialize(___ss);
+                turretSlots.Refresh();
+            }
+
+            var oldLayers = SetLayers(___ss.transform, targetLayerMask, 2);
+
+            float found = float.MaxValue;
+
+            int bidx = 0;
+            foreach(var barrel in turretSlots.GetBarrels(__instance.turretIndex)) {
+                var wasHit = Physics.Raycast(barrel.position, barrel.rotation.eulerAngles, out var hitInfo, ___desiredDistance, targetLayerMask, QueryTriggerInteraction.Ignore);
+                if (wasHit) {
+                    lines[bidx].SetPositions(new Vector3[] { barrel.transform.position, hitInfo.point });
+                    lines[bidx].enabled = true;
+                }
+                else {
+                    lines[bidx].enabled = false;
+                }
+
+                if (wasHit && hitInfo.transform == targetTrans) {
+                    var dst = (barrel.position - hitInfo.point).magnitude;
+                    if (dst < found)
+                        found = dst;
+                }
+
+                ++bidx;
+            }
+            for (; bidx < 10; ++bidx)
+                lines[bidx].enabled = false;
+            //if (found != float.MaxValue)
+            //    __result = found;
+            ResetLayers(oldLayers);
         }
 
         static void Weapon_Fire_Projectile(Transform target, bool buttonDown,

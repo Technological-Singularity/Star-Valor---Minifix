@@ -5,7 +5,6 @@ using System;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Charon.StarValor.Minifix.MultibarrelMemory {
     [BepInPlugin(pluginGuid, pluginName, pluginVersion)]
@@ -25,23 +24,50 @@ namespace Charon.StarValor.Minifix.MultibarrelMemory {
         }
 
         static void SaveTurrets(SpaceShip ss, int modelId) {
-            turretModesByShipModelId[modelId] = ss.transform.GetComponentsInChildren<WeaponTurret>().ToDictionary(o => (int)o.turretIndex, o => o.alternateFire ? 1 : 0);
-        }
-        static void LoadTurrets(SpaceShip ss, int modelId) {
-            if (turretModesByShipModelId.TryGetValue(modelId, out var dict)) {
-                foreach (var o in ss.transform.GetComponentsInChildren<WeaponTurret>())
-                    o.alternateFire = dict[o.turretIndex] != 0;
-                foreach (var o in ss.weaponTrans.GetComponents<Weapon>())
-                    o.Load(true);
+            var dict = new Dictionary<int, int>();
+            turretModesByShipModelId[modelId] = dict;
+
+            for (int i = 0; i < ss.weaponSlots.childCount; ++i) {
+                var turret = ss.weaponSlots.GetChild(i).GetComponent<WeaponTurret>();
+                if (turret == null)
+                    continue;
+                dict[i] = turret.alternateFire ? 1 : 0;
             }
         }
+        static void SaveTurretSingle(int modelId, WeaponTurret turret) {
+            if (!turretModesByShipModelId.TryGetValue(modelId, out var dict)) {
+                dict = new Dictionary<int, int>();
+                turretModesByShipModelId[modelId] = dict;
+            }
+            dict[turret.turretIndex] = turret.alternateFire ? 1 : 0;
+        }
+        static void LoadTurrets(SpaceShip ss, int modelId) {
+            if (!turretModesByShipModelId.TryGetValue(modelId, out var dict))
+                return;
+
+            for (int i = 0; i < ss.weaponSlots.childCount; ++i) {
+                var turret = ss.weaponSlots.GetChild(i).GetComponent<WeaponTurret>();
+                if (turret == null)
+                    continue;
+                turret.alternateFire = dict[i] != 0;
+            }
+            foreach (var o in ss.weaponTrans.GetComponents<Weapon>())
+                o.Load(true);
+        }
+
+        [HarmonyPatch(typeof(WeaponPlaceSlot), nameof(WeaponPlaceSlot.MouseDown))]
+        [HarmonyPostfix]
+        static void WeaponPlaceSlot_MouseDown_SaveAltFire(WeaponTurret ___wt) {
+            var ss = ___wt.transform.parent.GetComponentInParent<SpaceShip>();
+            SaveTurretSingle(ss.shipData.shipModelID, ___wt);
+        }
+
 
         [HarmonyPatch(typeof(SpaceShip), "CalculateShipStats")]
         [HarmonyPrefix]
         static void SpaceShip_CalculateShipStats_TurretModesSave(ShipModel shipModel, SpaceShip __instance) {
             if (__instance == null || !__instance.CompareTag("Player") || !canSave)
                 return;
-            Log.LogMessage("SAVE");
             SaveTurrets(__instance, shipModel.data.id);
         }
 
