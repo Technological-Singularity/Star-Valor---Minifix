@@ -39,6 +39,22 @@ These plugins are small, standalone fixes that that do not require any other plu
 - [ ] Modifies save games: **No**
 - [ ] Requires additional mods: **No**
 
+Junk Diver
+---
+* Junk destruction calculations tweaked - destroying one junk many times is now just as effective as destroying a big pile all at once
+    * Destroying one piece of junk can grant up to one of the items below
+    * Equipment has highest priority, then rare metal, then scrap metal
+* Destroying junk can give weapons and equipment (as before, new calculations)
+    * Chance is affected by Expert Scavenging (minor) and Master Scavenging (major, and does not require perk)
+    * Higher average rarity with Master Scavenging (minor)
+* Destroying junk can give scrap metal
+    * Chance is affected by Expert Scavenging (major)
+    * Quantity is affected by Scavenging and bonuses from ships or equipment
+* Destroying junk can give rare metal
+    * Chance is affected by Expert Scavenging (minor)
+    * Quantity is affected by bonuses from ships or equipment
+
+
 Multibarrel Memory
 ---
 * Alternate fire mode for turrets (i.e., simultaneous multibarrel shots - available by right-clicking a weapon turret slot) will persist after swapping equipment

@@ -29,7 +29,11 @@ namespace Charon.StarValor.Minifix.MinerGunners {
             if (___gearMode != 0 && ___gearMode != 2)
                 return;
 
-            var control = WeaponTurretExtraControl.GetInstance(___ss);
+            WeaponTurretExtraControl control = ___ss.GetComponent<WeaponTurretExtraControl>();
+            if (control == null) {
+                control = ___ss.gameObject.AddComponent<WeaponTurretExtraControl>();
+                control.Initialize(___ss);
+            }
 
             if (___gearMode == 0) {
                 control.Pretext_Save();
@@ -81,7 +85,11 @@ namespace Charon.StarValor.Minifix.MinerGunners {
             if (gunner == null)
                 return;
 
-            var control = WeaponTurretExtraControl.GetInstance(___ss);
+            WeaponTurretExtraControl control = ___ss.GetComponent<WeaponTurretExtraControl>();
+            if (control == null) {
+                control = ___ss.gameObject.AddComponent<WeaponTurretExtraControl>();
+                control.Initialize(___ss);
+            }
 
             if (all) {
                 bool allSame = true;
@@ -122,7 +130,11 @@ namespace Charon.StarValor.Minifix.MinerGunners {
             if (gunner == null)
                 return;
 
-            var control = WeaponTurretExtraControl.GetInstance(___ss);
+            WeaponTurretExtraControl control = ___ss.GetComponent<WeaponTurretExtraControl>();
+            if (control == null) {
+                control = ___ss.gameObject.AddComponent<WeaponTurretExtraControl>();
+                control.Initialize(___ss);
+            }
             control.Postload_Restore();
 
         }
@@ -140,7 +152,11 @@ namespace Charon.StarValor.Minifix.MinerGunners {
 
             if (true) {
                 //version 2
-                var control = WeaponTurretExtraControl.GetInstance(___ss);
+                WeaponTurretExtraControl control = ___ss.GetComponent<WeaponTurretExtraControl>();
+                if (control == null) {
+                    control = ___ss.gameObject.AddComponent<WeaponTurretExtraControl>();
+                    control.Initialize(___ss);
+                }
                 control.SetTarget(__instance);
             }
 

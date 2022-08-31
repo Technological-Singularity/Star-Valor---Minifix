@@ -31,16 +31,6 @@ namespace Charon.StarValor.Minifix.MinerGunners {
         public int TargetModes;
     }
     public class WeaponTurretExtraControl : MonoBehaviour {
-
-        public static WeaponTurretExtraControl GetInstance(SpaceShip ss) {
-            WeaponTurretExtraControl control = ss.GetComponent<WeaponTurretExtraControl>();
-            if (control == null) {
-                control = ss.gameObject.AddComponent<WeaponTurretExtraControl>();
-                control.Initialize(ss);
-            }
-            return control;
-        }
-
         static readonly List<(ControlMode control, Stance stance, int targeting)> controlCycle = new List<(ControlMode control, Stance stance, int targeting)>() {
             (ControlMode.Player, Stance.Helpful, (int)TargetMode.None),
             (ControlMode.AI, Stance.Helpful, (int)TargetMode.Neutral | (int)TargetMode.Friendly),
@@ -227,7 +217,7 @@ namespace Charon.StarValor.Minifix.MinerGunners {
                     harmTargets.AddRange(allNeutral.Select(o => o.transform));
                 }
                 if (friendly && turret.canRepair) {
-                    var allFriendly = allShips.Where(o => ss.ffSys.TargetIsFriendly(o.ffSys) && Vector3.Distance(o.transform.position, ss.transform.position) <= repairRange && o.currHP < o.baseHP);
+                    var allFriendly = allShips.Where(o => o != ss && ss.ffSys.TargetIsFriendly(o.ffSys) && Vector3.Distance(o.transform.position, ss.transform.position) <= repairRange && o.currHP < o.baseHP);
                     repairTargets.AddRange(allFriendly);
                 }
                 if (repairTargets.Count > 0) {

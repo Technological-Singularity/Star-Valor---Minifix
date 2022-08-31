@@ -30,15 +30,24 @@ namespace Charon.StarValor.Minifix.AggressiveProjectiles {
                     Range = float.NaN;
                     Speed = float.NaN;
                 }
-                public float GetEffectiveRange(Vector3 relativePosition, Vector3 relativeVelocity) {
+                public float GetEffectiveRange(Transform target, Vector3 sourcePosition, Vector3 sourceVelocity) {
                     if (!IsValid)
                         return -1f;
 
                     if (float.IsInfinity(Speed))
                         return Range;
 
-                    var speed = Mathf.Max(0, Speed - Vector3.Dot(relativePosition.normalized, relativeVelocity));
-                    return speed * Range / Speed;
+                    var targetPredictor = target.GetComponent<TargetPredictor>();
+                    if (targetPredictor == null) {
+                        targetPredictor = target.gameObject.AddComponent<TargetPredictor>();
+                        targetPredictor.enabled = true;
+                    }
+                    var pos = targetPredictor.Predict_OneShot(sourcePosition, sourceVelocity, Speed);
+                    var relPosition = targetPredictor.State.pos - sourcePosition;
+                    var relVelocity = targetPredictor.State.vel - sourceVelocity;
+
+                    var speedTowards = Mathf.Max(0, Speed - Vector3.Dot(relPosition.normalized, relVelocity));
+                    return speedTowards * Range / Speed;
                 }
             }
 

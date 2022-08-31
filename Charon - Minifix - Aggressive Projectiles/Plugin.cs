@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 namespace Charon.StarValor.Minifix.AggressiveProjectiles {
 
@@ -142,28 +143,30 @@ namespace Charon.StarValor.Minifix.AggressiveProjectiles {
         [HarmonyPatch(typeof(WeaponTurret), "FindTarget")]
         [HarmonyPrefix]
         public static void FindTarget(Transform ___parentShipTrans, Transform ___tf, ref List<ScanObject> objs, bool smallObject) {
-            //filter the initial list so that only objects that are currently in LOF can actualy be targeted
-            const int layerMask = (1 << 8) | (1 << 9) | (1 << 13) | (1 << 14) | (1 << 16); //these are the objects that can occlude a shot
+            //This fix was designed to fix the Taurus laser targeting - it needs to be fixed so it doesn't stop e.g. firing at an asteroid behind another asteroid
 
-            var oldLayers = SetLayers(___parentShipTrans, layerMask, 2); //ignore raycast layer
+            ////filter the initial list so that only objects that are currently in LOF can actualy be targeted
+            //const int layerMask = (1 << 8) | (1 << 9) | (1 << 13) | (1 << 14) | (1 << 16); //these are the objects that can occlude a shot
 
-            var newList = new List<ScanObject>();
-            foreach (var o in objs) {
-                if (o == null || o.trans == null)
-                    continue;
-                if (o.trans.CompareTag("Projectile")) {
-                    newList.Add(o);
-                    continue;
-                }
-                var relP = o.trans.position - ___tf.position;
-                var wasHit = Physics.Raycast(___tf.position, relP.normalized, out var hitInfo, 2 * relP.magnitude, layerMask, QueryTriggerInteraction.Ignore);
-                if (wasHit && hitInfo.transform == o.trans)
-                    newList.Add(o);
-            }
+            //var oldLayers = SetLayers(___parentShipTrans, layerMask, 2); //ignore raycast layer
 
-            ResetLayers(oldLayers);
+            //var newList = new List<ScanObject>();
+            //foreach (var o in objs) {
+            //    if (o == null || o.trans == null)
+            //        continue;
+            //    if (o.trans.CompareTag("Projectile")) {
+            //        newList.Add(o);
+            //        continue;
+            //    }
+            //    var relP = o.trans.position - ___tf.position;
+            //    var wasHit = Physics.Raycast(___tf.position, relP.normalized, out var hitInfo, 2 * relP.magnitude, layerMask, QueryTriggerInteraction.Ignore);
+            //    if (wasHit && hitInfo.transform == o.trans)
+            //        newList.Add(o);
+            //}
 
-            objs = newList;
+            //ResetLayers(oldLayers);
+
+            //objs = newList;
         }
 
 
@@ -248,25 +251,16 @@ namespace Charon.StarValor.Minifix.AggressiveProjectiles {
         [HarmonyPrefix]
         public static void WeaponTurret_CanFireAgainst_FixRange(WeaponTurret __instance, Transform targetTrans, ref float ___desiredDistance, ref float __state, SpaceShip ___ss) {
             __state = ___desiredDistance;
-            if (targetTrans.CompareTag("Projectile")) {
+            if (true/*targetTrans.CompareTag("Projectile")*/) {
                 var component = ___ss.GetComponent<WeaponSlotExtraData>();
                 if (component == null) {
                     component = ___ss.gameObject.AddComponent<WeaponSlotExtraData>();
                     component.Initialize(___ss);
                     component.Refresh();
                 }
-
-                var targetRB = targetTrans.GetComponent<Rigidbody>();
-                if (targetRB == null)
-                    targetRB = ___ss.rb;
-
-                var relPosition = targetTrans.position - __instance.transform.position;
-                var relVelocity = targetRB.velocity - ___ss.rb.velocity;
-                var newDistance = component[__instance.turretIndex, WeaponSlotExtraData.WeaponStatType.PD].GetEffectiveRange(relPosition, relVelocity);
-
+                var newDistance = component[__instance.turretIndex, WeaponSlotExtraData.WeaponStatType.PD].GetEffectiveRange(targetTrans, ___ss.rb.position, ___ss.rb.velocity);
                 ___desiredDistance = newDistance;
             }
-            //add more target types later if appropriate; this currently only affects point defense weapons
         }
 
         [HarmonyPatch(typeof(WeaponTurret), "CanFireAgainst")]
