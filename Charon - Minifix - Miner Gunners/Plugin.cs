@@ -144,7 +144,7 @@ namespace Charon.StarValor.Minifix.MinerGunners {
         public static void SearchForATarget(WeaponTurret __instance, SpaceShip ___ss) {
             if (___ss.transform.GetComponent<PlayerControl>() == null)
                 return;
-            if (__instance.notAttackingTime > 0 || __instance.target != null && __instance.target.GetComponent<Rigidbody>() != null && CanFireAgainst(__instance, __instance.target) >= 0)
+            if (__instance.NotAttackingTime > 0 || __instance.target != null && __instance.target.GetComponent<Rigidbody>() != null && CanFireAgainst(__instance, __instance.target) >= 0)
                 return;
 
             //if (__instance.target != null && CanFireAgainst(__instance, __instance.target)
