@@ -39,6 +39,15 @@ These plugins are small, standalone fixes that that do not require any other plu
 - [ ] Modifies save games: **No**
 - [ ] Requires additional mods: **No**
 
+Reliable Explosions
+---
+* Explosions check for detection more often, which should prevent particularly speedy ships from avoiding damage
+
+Reordered Damage
+---
+* Damage is applied at the end of a frame, rather than during the physics or main update phases
+* Consequences: Bumping into collectible objects will no longer deal damage before collecting them. Instead, they will be collected, and the damage that would be dealt will be ignored.
+
 Junk Diver
 ---
 * Junk destruction calculations tweaked - destroying one junk many times is now just as effective as destroying a big pile all at once
