@@ -45,7 +45,7 @@ Rotocamera (WIP)
 ---
 * Adds a controllable orbital camera
 * Adjusts the particle starfield to be more aesthetically pleasing for a 3d camera
-    * This also has the side effect of making the particle field look different in general - possibly more aesthetically pleasing
+    * This also has the side effect of making the particle field look different in general - less dense, more varied
 * Press Shift + Hold Fire (default H) to adjust (or stop adjusting) the camera and set to chase mode
     * Pressing escape will also stop adjusting the camera
 * Press Left Alt + Hold Fire (default H) to reset the camera and remove the camera and reset back to normal mode
