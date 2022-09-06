@@ -41,11 +41,20 @@ These plugins are small, standalone fixes that that do not require any other plu
 - [ ] Modifies save games: **No**
 - [ ] Requires additional mods: **No**
 
+Rotocamera (WIP)
+---
+* Adds a controllable orbital camera
+* Adjusts the particle starfield to be more aesthetically pleasing for a 3d camera
+    * This also has the side effect of making the particle field look different in general - possibly more aesthetically pleasing
+* Press Shift + Hold Fire (default H) to adjust (or stop adjusting) the camera and set to chase mode
+    * Pressing escape will also stop adjusting the camera
+* Press Left Alt + Hold Fire (default H) to reset the camera and remove the camera and reset back to normal mode
+
 Reliable Explosions
 ---
 * Explosions check for detection more often, which should prevent particularly speedy ships from avoiding damage
 
-Reordered Damage
+Reordered Damage (WIP)
 ---
 * Damage is applied at the end of a frame, rather than during the physics or main update phases
 * Consequences: Bumping into collectible objects will no longer deal damage before collecting them. Instead, they will be collected, and the damage that would be dealt will be ignored.
@@ -64,7 +73,6 @@ Junk Diver
 * Destroying junk can give rare metal
     * Chance is affected by Expert Scavenging (minor)
     * Quantity is affected by bonuses from ships or equipment
-
 
 Multibarrel Memory
 ---
