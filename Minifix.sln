@@ -7,8 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Charon - Minifix - Blue Col
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Charon - Minifix - Miner Gunners", "Charon - Minifix - Miner Gunners\Charon - Minifix - Miner Gunners.csproj", "{DDFE6E0F-DE0A-415E-83B2-90FD713D68D4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Charon - Minifix - Aggressive Projectiles", "Charon - Minifix - Aggressive Projectiles\Charon - Minifix - Aggressive Projectiles.csproj", "{2C57F4B9-6E10-4F70-A372-2D0215EF2188}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Charon - Minifix - Wider Targeting", "Charon - Minifix - Wider Targeting\Charon - Minifix - Wider Targeting.csproj", "{1A534923-E358-4B25-925D-38651EB140B5}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D0BDC1F4-89D8-453E-A6D5-1CCE79765366}"
@@ -22,7 +20,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test", "Test\Test.csproj", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Charon - Minifix - Multibarrel Memory", "Charon - Minifix - Multibarrel Memory\Charon - Minifix - Multibarrel Memory.csproj", "{DBF9E121-16DF-4336-A747-B83E545A9203}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Charon - Minifix - Junk Diver", "Charon - Minifix - Junk Diver\Charon - Minifix - Junk Diver.csproj", "{86CC64D5-F7D8-44C9-B9E6-2C730B80008E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Charon - Minifix - Junk Diver", "Charon - Minifix - Junk Diver\Charon - Minifix - Junk Diver.csproj", "{86CC64D5-F7D8-44C9-B9E6-2C730B80008E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Charon - Minifix - Reordered Damage", "Charon - Minifix - Reordered Damage\Charon - Minifix - Reordered Damage.csproj", "{F764F8D5-1070-4312-8114-0E42F18ABF09}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Charon - Minifix - Reliable Explosions", "Charon - Minifix - Reliable Explosions\Charon - Minifix - Reliable Explosions.csproj", "{153F9092-8864-45DC-B9F4-CC0AEC144501}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Charon - Minifix - Rotocamera", "Charon - Minifix - Rotocamera\Charon - Minifix - Rotocamera.csproj", "{A01EFD5A-9F92-43DA-A44B-E5D5B0D8706A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Charon - Minifix - Less Fragile Collectibles", "Charon - Minifix - Less Fragile Collectibles\Charon - Minifix - Less Fragile Collectibles.csproj", "{7B1D6F41-D4F1-4866-AF1C-F4FA369DF023}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -62,6 +68,26 @@ Global
 		{86CC64D5-F7D8-44C9-B9E6-2C730B80008E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{86CC64D5-F7D8-44C9-B9E6-2C730B80008E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{86CC64D5-F7D8-44C9-B9E6-2C730B80008E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BDBDE454-1241-49B0-AC01-726D20A1F092}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BDBDE454-1241-49B0-AC01-726D20A1F092}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BDBDE454-1241-49B0-AC01-726D20A1F092}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BDBDE454-1241-49B0-AC01-726D20A1F092}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F764F8D5-1070-4312-8114-0E42F18ABF09}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F764F8D5-1070-4312-8114-0E42F18ABF09}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F764F8D5-1070-4312-8114-0E42F18ABF09}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F764F8D5-1070-4312-8114-0E42F18ABF09}.Release|Any CPU.Build.0 = Release|Any CPU
+		{153F9092-8864-45DC-B9F4-CC0AEC144501}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{153F9092-8864-45DC-B9F4-CC0AEC144501}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{153F9092-8864-45DC-B9F4-CC0AEC144501}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{153F9092-8864-45DC-B9F4-CC0AEC144501}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A01EFD5A-9F92-43DA-A44B-E5D5B0D8706A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A01EFD5A-9F92-43DA-A44B-E5D5B0D8706A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A01EFD5A-9F92-43DA-A44B-E5D5B0D8706A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A01EFD5A-9F92-43DA-A44B-E5D5B0D8706A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7B1D6F41-D4F1-4866-AF1C-F4FA369DF023}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7B1D6F41-D4F1-4866-AF1C-F4FA369DF023}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7B1D6F41-D4F1-4866-AF1C-F4FA369DF023}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7B1D6F41-D4F1-4866-AF1C-F4FA369DF023}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
