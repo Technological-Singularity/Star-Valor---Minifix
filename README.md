@@ -41,6 +41,11 @@ These plugins are small, standalone fixes that that do not require any other plu
 - [ ] Modifies save games: **No**
 - [ ] Requires additional mods: **No**
 
+Battleship Availability
+---
+* Makes Battleships available as derelicts and blueprints (normally Battleships are specifically excluded for unknown reasons)
+* I consider this a bug fix
+
 Rotocamera (WIP)
 ---
 * Adds a controllable orbital camera

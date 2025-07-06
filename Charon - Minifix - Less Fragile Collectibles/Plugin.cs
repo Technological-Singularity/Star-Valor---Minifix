@@ -33,6 +33,8 @@ namespace Charon.StarValor.Minifix.LessFragileCollectibles {
         static bool Entity_ApplyImpactDamage_DontHurtCollectible(float dmg, TCritical crit, DamageType dmgType, Vector3 point, Transform dmgDealer, WeaponImpact impact, Vector3 lookPosition, Entity __instance) {
             if (dmgDealer == null)
                 return true;
+
+            //Plugin.Log.LogMessage(__instance.name + " was dealt " + dmg + " damage by " + (dmgDealer == null ? " NULL" : dmgDealer.name));
             
             var cs = dmgDealer.GetComponent<CargoSystem>();
             if (cs == null)

@@ -30,6 +30,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Charon - Minifix - Rotocame
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Charon - Minifix - Less Fragile Collectibles", "Charon - Minifix - Less Fragile Collectibles\Charon - Minifix - Less Fragile Collectibles.csproj", "{7B1D6F41-D4F1-4866-AF1C-F4FA369DF023}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Charon - Minifix - Battleship Availability", "Charon - Minifix - Battleship Availability\Charon - Minifix - Battleship Availability.csproj", "{390088DC-127F-482F-9D50-7E97EDE17509}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,10 +46,6 @@ Global
 		{DDFE6E0F-DE0A-415E-83B2-90FD713D68D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DDFE6E0F-DE0A-415E-83B2-90FD713D68D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DDFE6E0F-DE0A-415E-83B2-90FD713D68D4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2C57F4B9-6E10-4F70-A372-2D0215EF2188}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2C57F4B9-6E10-4F70-A372-2D0215EF2188}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2C57F4B9-6E10-4F70-A372-2D0215EF2188}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2C57F4B9-6E10-4F70-A372-2D0215EF2188}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1A534923-E358-4B25-925D-38651EB140B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1A534923-E358-4B25-925D-38651EB140B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1A534923-E358-4B25-925D-38651EB140B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -68,10 +66,6 @@ Global
 		{86CC64D5-F7D8-44C9-B9E6-2C730B80008E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{86CC64D5-F7D8-44C9-B9E6-2C730B80008E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{86CC64D5-F7D8-44C9-B9E6-2C730B80008E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BDBDE454-1241-49B0-AC01-726D20A1F092}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BDBDE454-1241-49B0-AC01-726D20A1F092}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BDBDE454-1241-49B0-AC01-726D20A1F092}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BDBDE454-1241-49B0-AC01-726D20A1F092}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F764F8D5-1070-4312-8114-0E42F18ABF09}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F764F8D5-1070-4312-8114-0E42F18ABF09}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F764F8D5-1070-4312-8114-0E42F18ABF09}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -88,6 +82,10 @@ Global
 		{7B1D6F41-D4F1-4866-AF1C-F4FA369DF023}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7B1D6F41-D4F1-4866-AF1C-F4FA369DF023}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7B1D6F41-D4F1-4866-AF1C-F4FA369DF023}.Release|Any CPU.Build.0 = Release|Any CPU
+		{390088DC-127F-482F-9D50-7E97EDE17509}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{390088DC-127F-482F-9D50-7E97EDE17509}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{390088DC-127F-482F-9D50-7E97EDE17509}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{390088DC-127F-482F-9D50-7E97EDE17509}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
