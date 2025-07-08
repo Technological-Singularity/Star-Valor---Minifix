@@ -23,8 +23,9 @@ After installing, if your mods don't work, try the following:
 Downloads
 ---
 Plugin links: [All plugins](https://www.dropbox.com/sh/bn4kfjyousemti0/AAAQMEH73Icp3-Yvi-WtwREZa?dl=0)
-* **'Latest'**: Most recently compiled versions; 
 * **'Stable'**: Versions known to be stable
+* **'Latest'**: Most recently compiled versions
+* **'Experimental'**: Versions that are still under development and linked to help with testing
 
 Source links: [Minifix](https://github.com/Technological-Singularity/Star-Valor---Minifix)
 
