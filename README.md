@@ -77,21 +77,6 @@ Aggressive Projectiles (WIP)
 * Point defense weapons will start firing earlier, allowing more reliable interception
 * NPC enemies will chase more accurately (using the same method as projectile aiming)
 
-Junk Diver (WIP)
----
-* Junk destruction calculations tweaked - destroying one junk many times is now just as effective as destroying a big pile all at once
-    * Destroying one piece of junk can grant up to one of the items below
-    * Equipment has highest priority, then rare metal, then scrap metal
-* Destroying junk can give weapons and equipment (as before, new calculations)
-    * Chance is affected by Expert Scavenging (minor) and Master Scavenging (major, and does not require perk)
-    * Higher average rarity with Master Scavenging (minor)
-* Destroying junk can give scrap metal
-    * Chance is affected by Expert Scavenging (major)
-    * Quantity is affected by Scavenging and bonuses from ships or equipment
-* Destroying junk can give rare metal
-    * Chance is affected by Expert Scavenging (minor)
-    * Quantity is affected by bonuses from ships or equipment
-
 Multibarrel Memory (WIP)
 ---
 * Alternate fire mode for turrets (i.e., simultaneous multibarrel shots - available by right-clicking a weapon turret slot) will persist after swapping equipment, warps, and save/load games
@@ -110,3 +95,20 @@ Wider Targeting (WIP)
 ---
 * Mouseover targeting for ships is more generous, which should make targeting easier for small ships
 * Allows targeting the nearest asteroid to the mouse using "Shift" + "Target Any" hotkey (same hotkeys that the base game uses; configurable as per normal)
+
+Junk Diver (Deprecated 2025)
+---
+* This mod is now deprecated - most of its features are already present in the base game in some form.
+* I am leaving the source code in place for educational purposes, but it will not receive further updates (and likely will *not* work).
+* Junk destruction calculations tweaked - destroying one junk many times is now just as effective as destroying a big pile all at once
+    * Destroying one piece of junk can grant up to one of the items below
+    * Equipment has highest priority, then rare metal, then scrap metal
+* Destroying junk can give weapons and equipment (as before, new calculations)
+    * Chance is affected by Expert Scavenging (minor) and Master Scavenging (major, and does not require perk)
+    * Higher average rarity with Master Scavenging (minor)
+* Destroying junk can give scrap metal
+    * Chance is affected by Expert Scavenging (major)
+    * Quantity is affected by Scavenging and bonuses from ships or equipment
+* Destroying junk can give rare metal
+    * Chance is affected by Expert Scavenging (minor)
+    * Quantity is affected by bonuses from ships or equipment
