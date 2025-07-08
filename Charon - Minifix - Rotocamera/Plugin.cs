@@ -4,7 +4,6 @@ using UnityEngine;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using Rewired;
-using static UnityEngine.UI.GridLayoutGroup;
 
 namespace Charon.StarValor.Minifix.Rotocamera {
     [BepInPlugin(pluginGuid, pluginName, pluginVersion)]
@@ -53,11 +52,19 @@ namespace Charon.StarValor.Minifix.Rotocamera {
             Log = Logger;
             Harmony.CreateAndPatchAll(typeof(Plugin));
         }
+
+        static float? PlayerRelativeMouseDistance = null;
+
         [HarmonyPatch(typeof(PlayerControl), "FixedUpdate")]
         [HarmonyPrefix]
-        static void PlayerControl_FixedUpdate_CameraFix(Vector3 ___mousePosition, ref Vector3 __state) {
+        static void PlayerControl_FixedUpdate_CameraFix(Vector3 ___mousePosition, ref Vector3 __state, PlayerControl __instance, AimControl ___aimControl, Camera ___currCamera) {
             if (CameraControl.SettingRotation) {
                 __state = ___mousePosition;
+            }
+
+            if (__instance.steerMode == 0 || __instance.aimMode == 1) {
+                Vector3 pos = __instance.aimMode == 0 ? Input.mousePosition : ___aimControl.crosshair.position;
+                PlayerRelativeMouseDistance = pos.x / ___currCamera.pixelWidth - 0.5f;
             }
         }
         [HarmonyPatch(typeof(PlayerControl), "FixedUpdate")]
@@ -66,11 +73,43 @@ namespace Charon.StarValor.Minifix.Rotocamera {
             if (CameraControl.SettingRotation) {
                 ___mousePosition = __state;
             }
+
+            PlayerRelativeMouseDistance = null;
         }
         [HarmonyPatch(typeof(Starfield), nameof(Starfield.RefreshStarSize))]
         [HarmonyPostfix]
         static void Starfield_RefreshStarSize_UpdateCamera(bool big, float ___starSize, ParticleSystem ___ps) {
             CameraControl.RefreshStarSize(___starSize + (big ? 0.2f : 0), ___ps);
+        }
+
+        [HarmonyPatch(typeof(SpaceShip), "Turn")]
+        [HarmonyPrefix]
+        static bool SpaceShip_Turn_PlayerCameraFix(Quaternion targetRotation, SpaceShip __instance) {
+            if (__instance != PlayerControl.inst.GetSpaceShip)
+                return true;
+
+            if (PlayerRelativeMouseDistance is null)
+                return true;
+
+            var dx = Mathf.Abs(PlayerRelativeMouseDistance.Value);
+
+            float rate;
+            float cutoff_min = 0.005f;
+            float cutoff_max = 0.025f;
+            if (dx >= cutoff_max)
+                rate = 1;
+            else if (dx > cutoff_min)
+                rate = (dx - cutoff_min) / (cutoff_max - cutoff_min);
+            else
+                rate = 0;
+            
+            rate *= Time.deltaTime * __instance.stats.turnSpeed * 5f * __instance.crew.efficiency[1];
+            if (rate > 0) {
+                if (rate < Time.deltaTime * 2f)
+                    rate = Time.deltaTime * 2f;
+                __instance.transform.rotation = Quaternion.RotateTowards(__instance.transform.rotation, targetRotation, rate);
+            }
+            return false;
         }
 
         class CameraRotator : MonoBehaviour {
