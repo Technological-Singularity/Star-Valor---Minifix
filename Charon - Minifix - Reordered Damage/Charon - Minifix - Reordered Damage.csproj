@@ -6,7 +6,7 @@
   </PropertyGroup>
 	
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy &quot;$(TargetDir)$(TargetFileName)&quot; &quot;D:\Games\SteamLibrary\steamapps\common\Star Valor\BepInEx\plugins&quot; /y&#xD;&#xA;xcopy &quot;$(TargetDir)$(TargetFileName)&quot; &quot;C:\Users\Jon\source\repos\Star Valor Mods\_staging&quot; /y" />
+    <Exec Command="xcopy &quot;$(TargetDir)$(TargetFileName)&quot; &quot;D:\Games\SteamLibrary\steamapps\common\Star Valor\BepInEx\plugins&quot; /y&#xD;&#xA;xcopy &quot;$(TargetDir)$(TargetFileName)&quot; &quot;$(ProjectDir)..\..\_staging&quot; /y" />
   </Target>
 	
   <ItemGroup>
