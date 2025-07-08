@@ -43,8 +43,8 @@ These plugins are small, standalone fixes that that do not require any other plu
 
 Battleship Availability
 ---
-* Makes Battleships available as derelicts and blueprints (normally Battleships are specifically excluded for unknown reasons)
-* I consider this a bug fix
+* Makes Battleships available as derelicts and blueprints (normally Battleships are specifically excluded for unknown reasons - I consider this a bug)
+* Does not alter "special" ships: with or without this mod, if a ship cannot be purchased in any store (e.g., the Zeus), then it also cannot show up as a derelict or random blueprint
 
 Blue Collar
 ---
