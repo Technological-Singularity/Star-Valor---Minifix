@@ -185,7 +185,7 @@ namespace Charon.StarValor.Minifix.MinerGunners {
                     }
                 }
                 if (newTarget != null)
-                    __instance.SetMiningTarget(newTarget);
+                    __instance.SetMiningTarget(newTarget, null);
             }
         }
     }

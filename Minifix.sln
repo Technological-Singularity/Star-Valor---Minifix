@@ -20,8 +20,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test", "Test\Test.csproj", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Charon - Minifix - Multibarrel Memory", "Charon - Minifix - Multibarrel Memory\Charon - Minifix - Multibarrel Memory.csproj", "{DBF9E121-16DF-4336-A747-B83E545A9203}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Charon - Minifix - Junk Diver", "Charon - Minifix - Junk Diver\Charon - Minifix - Junk Diver.csproj", "{86CC64D5-F7D8-44C9-B9E6-2C730B80008E}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Charon - Minifix - Reordered Damage", "Charon - Minifix - Reordered Damage\Charon - Minifix - Reordered Damage.csproj", "{F764F8D5-1070-4312-8114-0E42F18ABF09}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Charon - Minifix - Reliable Explosions", "Charon - Minifix - Reliable Explosions\Charon - Minifix - Reliable Explosions.csproj", "{153F9092-8864-45DC-B9F4-CC0AEC144501}"
@@ -62,10 +60,6 @@ Global
 		{DBF9E121-16DF-4336-A747-B83E545A9203}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DBF9E121-16DF-4336-A747-B83E545A9203}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DBF9E121-16DF-4336-A747-B83E545A9203}.Release|Any CPU.Build.0 = Release|Any CPU
-		{86CC64D5-F7D8-44C9-B9E6-2C730B80008E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{86CC64D5-F7D8-44C9-B9E6-2C730B80008E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{86CC64D5-F7D8-44C9-B9E6-2C730B80008E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{86CC64D5-F7D8-44C9-B9E6-2C730B80008E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F764F8D5-1070-4312-8114-0E42F18ABF09}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F764F8D5-1070-4312-8114-0E42F18ABF09}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F764F8D5-1070-4312-8114-0E42F18ABF09}.Release|Any CPU.ActiveCfg = Release|Any CPU

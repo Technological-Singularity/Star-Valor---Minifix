@@ -21,6 +21,9 @@ namespace Charon.Test {
         void Update() {
             if (alreadyRun)
                 return;
+
+
+
             FieldInfo f = typeof(GenData).GetField("generalData", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
             GeneralData data = (GeneralData)f.GetValue(null);
             if (data == null)
@@ -69,9 +72,6 @@ namespace Charon.Test {
         static bool FixCrew(CrewMember newCrewMember, PerksPanel pPanel) {
             if (newCrewMember == null || pPanel == null)
                 return false;
-
-
-
             return true;
         }
     }

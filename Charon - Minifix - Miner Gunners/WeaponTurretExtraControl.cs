@@ -206,7 +206,7 @@ namespace Charon.StarValor.Minifix.MinerGunners {
                 harmTargets.AddRange(asteroids);
             }
 
-            turret.SetMiningTarget(null);
+            turret.ForgetTarget();
             if (neutral || friendly/* || owned*/) {
                 var allShips = Physics.OverlapSphere(turret.transform.position, harmRange, 8704) //8704 is layer mask for ships
                     .Where(o => CanFireAgainst(turret, o.transform) > 0)
@@ -230,8 +230,8 @@ namespace Charon.StarValor.Minifix.MinerGunners {
                             mostDamaged = o.transform;
                         }
                     }
-                    turret.SetMiningTarget(mostDamaged); //used to force attack target
-                    turret.repairingTarget = true; //override repair behavior
+                    turret.SetMiningTarget(mostDamaged, null); //used to force attack target
+                    turret.RepairingTarget = true; //override repair behavior
                 }
             }
             if (turret.target == null) {
@@ -244,7 +244,7 @@ namespace Charon.StarValor.Minifix.MinerGunners {
                         closest = o;
                     }
                 }
-                turret.SetMiningTarget(closest);
+                turret.SetMiningTarget(closest, null);
             }
         }
     }
